@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scalapb-plugin.iml" filepath="$PROJECT_DIR$/.idea/modules/scalapb-plugin.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scalapb-plugin_main.iml" filepath="$PROJECT_DIR$/.idea/modules/scalapb-plugin_main.iml" group="scalapb-plugin" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scalapb-plugin_test.iml" filepath="$PROJECT_DIR$/.idea/modules/scalapb-plugin_test.iml" group="scalapb-plugin" />
+    </modules>
+  </component>
+</project>
