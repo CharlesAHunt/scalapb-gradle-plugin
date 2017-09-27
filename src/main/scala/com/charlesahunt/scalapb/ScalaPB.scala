@@ -5,11 +5,9 @@ import org.gradle.api.tasks.TaskAction
 
 class ScalaPB extends DefaultTask {
 
-  def getMessage(): String = { "test" }
-
   @TaskAction
-  def sayGreeting(): Unit = {
-    System.out.printf("IT WORKS!!")
+  def compileProtos(): Unit = {
+    println("todo")
   }
 
 }

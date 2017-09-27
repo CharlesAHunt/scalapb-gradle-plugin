@@ -6,7 +6,7 @@ import org.gradle.api.Project
 class ScalaPBPlugin extends Plugin[Project] {
 
     def apply(project: Project): Unit = {
-        project.getTasks.create("hello", new ScalaPB().getClass)
+        project.getTasks.create("scalapb", classOf[ScalaPB])
     }
 
 }

@@ -16,7 +16,6 @@ version = '1.0.0'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-apply plugin: 'groovy'
 apply plugin: 'java'
 apply plugin: 'scala'
 apply plugin: 'idea'
@@ -31,12 +30,11 @@ repositories {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "3.3"
+    gradleVersion = "4.2"
 }
 
 dependencies {
     compile gradleApi()
-    compile 'org.codehaus.groovy:groovy-all:2.4.7'
     compile 'org.scala-lang:scala-library:2.12.3'
     compile 'com.typesafe.scala-logging:scala-logging_2.12:3.7.2'
     zinc 'com.typesafe.zinc:zinc:0.3.13'
@@ -60,7 +58,7 @@ gradlePlugin {
     plugins {
         scalapbPlugin {
             id = 'scalapb'
-            implementationClass = 'com.charlesahunt.scalapb.ScalaPB'
+            implementationClass = 'com.charlesahunt.scalapb.ScalaPBPlugin'
         }
     }
 }
