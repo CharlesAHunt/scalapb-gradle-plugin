@@ -1,3 +1,15 @@
+//Apply the publishing plugin
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.8"
+    }
+}
+
 plugins {
     id 'scala'
     id 'idea'
@@ -11,7 +23,7 @@ plugins {
 }
 
 group 'com.charlesahunt'
-version = '1.0.0'
+version = '1.0.11'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -35,8 +47,10 @@ task wrapper(type: Wrapper) {
 
 dependencies {
     compile gradleApi()
+    compile localGroovy()
     compile 'org.scala-lang:scala-library:2.12.3'
     compile 'org.scala-sbt:io_2.12:1.1.0'
+    compile 'com.github.os72:protoc-jar:3.4.0'
     compile 'com.trueaccord.scalapb:compilerplugin_2.12:0.6.5'
     compile 'com.typesafe.scala-logging:scala-logging_2.12:3.7.2'
     zinc 'com.typesafe.zinc:zinc:0.3.13'
@@ -57,7 +71,7 @@ artifacts {
 gradlePlugin {
     plugins {
         scalapbPlugin {
-            id = 'scalapb'
+            id = 'com.charlesahunt.scalapb'
             implementationClass = 'com.charlesahunt.scalapb.ScalaPBPlugin'
         }
     }
@@ -84,9 +98,6 @@ bintray {
     }
 }
 
-project.ext.set('gradle.publish.key', System.getenv('GRADLE_PORTAL_KEY'))
-project.ext.set('gradle.publish.secret', System.getenv('GRADLE_PORTAL_SECRET'))
-
 pluginBundle {
     website = 'https://github.com/CharlesAHunt/scalapb-gradle-plugin'
     vcsUrl = 'git@github.com:CharlesAHunt/scalapb-gradle-plugin.git'
@@ -94,29 +105,10 @@ pluginBundle {
     
     plugins {
         scalapbPlugin {
-            id = 'scalapb'
+            id = 'com.charlesahunt.scalapb'
             displayName = 'Gradle ScalaPB Plugin'
-            description = 'TODO'
-        }
-    }
-}
-
-
-// Publishing to Artifactory
-// -------------------------
-
-// Configuration for com.jfrog.artifactory
-artifactory {
-    contextUrl = "http://devops.acmeindustries.com/artifactory"
-    publish {
-        repository {
-            repoKey     = 'plugins-release'
-            username    = 'todot'    // Note: Please do not actually store credentials in the build.gradle file
-            password    = 'todo'     // Inject them as environment variables or via your user Gradle properties
-            maven       = true
-        }
-        defaults{
-            publications("pluginPublication")    // Publication defined below
+            description = 'This plugin uses the [ScalaPB](http://scalapb.github.io) compiler to generate Scala case' +
+                    ' classes from protocol buffers and put them under the managed sources directory in your project.'
         }
     }
 }

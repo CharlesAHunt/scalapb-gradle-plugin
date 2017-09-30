@@ -5,7 +5,8 @@ import org.gradle.api.Project
 
 class ScalaPBPlugin extends Plugin[Project] {
 
-    def apply(project: Project): Unit = {
+    override def apply(project: Project): Unit = {
+        project.getExtensions.create("scalapbConfig", classOf[ScalaPBPluginExtension])
         project.getTasks.create("scalapb", classOf[ScalaPB])
     }
 

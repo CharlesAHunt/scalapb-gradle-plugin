@@ -1,25 +1,32 @@
 package com.charlesahunt.scalapb
 
-import com.typesafe.scalalogging.Logger
-import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.TaskAction
+import java.io.File
 
-class ScalaPB extends DefaultTask {
+import com.typesafe.scalalogging.{LazyLogging, Logger}
+import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.{OutputDirectory, TaskAction}
+import protocbridge.gens
+
+class ScalaPB extends DefaultTask with LazyLogging {
 
   @TaskAction
   def compileProtos(): Unit = {
-    println("Running scalapb compiler plugin")
-    ProtocPlugin
+    val depPS = getProject.getExtensions.findByType(classOf[ScalaPBPluginExtension]).dependentProtoSources
+    logger.info("Running scalapb compiler plugin for: " + getProject.getName)
+    ProtocPlugin.sourceGeneratorTask(getProject.getProjectDir.getAbsolutePath)
   }
 
-}
+  @OutputDirectory
+  def getOutputDir: File = new File(this.getPath+"/outputs")//TODO output dir should be set by config/args
 
+
+}
 
 import sbt.io._
 import java.io.File
 import protocbridge.Target
 
-object ProtocPlugin {
+object ProtocPlugin extends LazyLogging {
   object autoImport {
     object PB {
 //      val includePaths = SettingKey[Seq[File]]("protoc-include-paths", "The paths that contain *.proto dependencies.")
@@ -41,74 +48,66 @@ object ProtocPlugin {
     }
   }
 
-  private[sbtprotoc] final case class Arguments(
-    includePaths: Seq[File],
-    protocOptions: Seq[String],
-    pythonExe: String,
-    deleteTargetDirectory: Boolean,
-    targets: Seq[(File, Seq[String])]
-  )
-
   import autoImport.PB
 
-  val ProtobufConfig = config("protobuf")
+//  val ProtobufConfig = config("protobuf")
 
-  override def projectConfigurations: Seq[Configuration] = Seq(ProtobufConfig)
+//  override def projectConfigurations: Seq[Configuration] = Seq(ProtobufConfig)
 
-  def protobufGlobalSettings: Seq[Def.Setting[_]] = Seq(
-    includeFilter in PB.generate := "*.proto",
-    PB.externalIncludePath := target.value / "protobuf_external",
+//  def protobufGlobalSettings: Seq[Def.Setting[_]] = Seq(
+//    includeFilter in PB.generate := "*.proto",
+//    PB.externalIncludePath := target.value / "protobuf_external",
+//
+//    libraryDependencies ++= (PB.targets in Compile).value.flatMap(_.generator.suggestedDependencies.map(makeArtifact)),
+//
+//    managedClasspath in ProtobufConfig := {
+//      val artifactTypes: Set[String] = (classpathTypes in ProtobufConfig).value
+//      Classpaths.managedJars(ProtobufConfig, artifactTypes, (update in ProtobufConfig).value)
+//    },
+//    ivyConfigurations += ProtobufConfig,
+//    ,
+//    PB.pythonExe := "python",
+//    PB.deleteTargetDirectory := true
+//  )
+//
+//  // Settings that are applied at configuration (Compile, Test) scope.
+//  def protobufConfigSettings: Seq[Setting[_]] = Seq(
+//    arguments := Arguments(
+//      includePaths = PB.includePaths.value,
+//      protocOptions = PB.protocOptions.value,
+//      pythonExe = PB.pythonExe.value,
+//      deleteTargetDirectory = PB.deleteTargetDirectory.value,
+//      targets = PB.targets.value.map(target => (target.outputPath, target.options))
+//    ),
+//    PB.recompile := {
+//      import CacheArguments.instance
+//      arguments.previous.exists(_ != arguments.value)
+//    },
+//    PB.protocOptions := Nil,
+//    PB.protocOptions := PB.protocOptions.?.value.getOrElse(Nil),
+//
+//    PB.unpackDependencies := unpackDependenciesTask(PB.unpackDependencies).value,
+//
+//    PB.protoSources := PB.protoSources.?.value.getOrElse(Nil),
+//    PB.protoSources += sourceDirectory.value / "protobuf",
+//
+//    PB.includePaths := PB.includePaths.?.value.getOrElse(Nil),
+//    PB.includePaths ++= PB.protoSources.value,
+//    PB.includePaths += PB.externalIncludePath.value,
+//
+//    PB.targets := PB.targets.?.value.getOrElse(Nil),
+//
+//    PB.generate := sourceGeneratorTask(PB.generate).dependsOn(PB.unpackDependencies).value,
+//
+//    PB.runProtoc := { args =>
+//      com.github.os72.protocjar.Protoc.runProtoc(PB.protocVersion.value +: args.toArray)
+//    },
+//
+//    sourceGenerators += PB.generate.taskValue
+//  )
 
-    libraryDependencies ++= (PB.targets in Compile).value.flatMap(_.generator.suggestedDependencies.map(makeArtifact)),
-
-    managedClasspath in ProtobufConfig := {
-      val artifactTypes: Set[String] = (classpathTypes in ProtobufConfig).value
-      Classpaths.managedJars(ProtobufConfig, artifactTypes, (update in ProtobufConfig).value)
-    },
-    ivyConfigurations += ProtobufConfig,
-    PB.protocVersion := "-v330",
-    PB.pythonExe := "python",
-    PB.deleteTargetDirectory := true
-  )
-
-  // Settings that are applied at configuration (Compile, Test) scope.
-  def protobufConfigSettings: Seq[Setting[_]] = Seq(
-    arguments := Arguments(
-      includePaths = PB.includePaths.value,
-      protocOptions = PB.protocOptions.value,
-      pythonExe = PB.pythonExe.value,
-      deleteTargetDirectory = PB.deleteTargetDirectory.value,
-      targets = PB.targets.value.map(target => (target.outputPath, target.options))
-    ),
-    PB.recompile := {
-      import CacheArguments.instance
-      arguments.previous.exists(_ != arguments.value)
-    },
-    PB.protocOptions := Nil,
-    PB.protocOptions := PB.protocOptions.?.value.getOrElse(Nil),
-
-    PB.unpackDependencies := unpackDependenciesTask(PB.unpackDependencies).value,
-
-    PB.protoSources := PB.protoSources.?.value.getOrElse(Nil),
-    PB.protoSources += sourceDirectory.value / "protobuf",
-
-    PB.includePaths := PB.includePaths.?.value.getOrElse(Nil),
-    PB.includePaths ++= PB.protoSources.value,
-    PB.includePaths += PB.externalIncludePath.value,
-
-    PB.targets := PB.targets.?.value.getOrElse(Nil),
-
-    PB.generate := sourceGeneratorTask(PB.generate).dependsOn(PB.unpackDependencies).value,
-
-    PB.runProtoc := { args =>
-      com.github.os72.protocjar.Protoc.runProtoc(PB.protocVersion.value +: args.toArray)
-    },
-
-    sourceGenerators += PB.generate.taskValue
-  )
-
-  override def projectSettings: Seq[Def.Setting[_]] =
-    protobufGlobalSettings ++ inConfig(Compile)(protobufConfigSettings)
+//  override def projectSettings: Seq[Def.Setting[_]] =
+//    protobufGlobalSettings ++ inConfig(Compile)(protobufConfigSettings)
 
   case class UnpackedDependencies(dir: File, files: Seq[File])
 
@@ -118,8 +117,7 @@ object ProtocPlugin {
     includePaths: Seq[File],
     protocOptions: Seq[String],
     targets: Seq[Target],
-    pythonExe: String,
-    log: Logger
+    pythonExe: String
   ) : Int =
     try {
       val incPath = includePaths.map("-I" + _.getCanonicalPath)
@@ -138,37 +136,38 @@ object ProtocPlugin {
     targets: Seq[Target],
     pythonExe: String,
     deleteTargetDirectory: Boolean,
-    log: Logger
-  ) = {
+  ): Set[File] = {
     // Sort by the length of path names to ensure that delete parent directories before deleting child directories.
     val generatedTargetDirs = targets.map(_.outputPath).sortBy(_.getAbsolutePath.length)
     generatedTargetDirs.foreach{ targetDir =>
-      if (deleteTargetDirectory) {
+      if (deleteTargetDirectory)
         IO.delete(targetDir)
-      }
+
       targetDir.mkdirs()
     }
 
     if (schemas.nonEmpty && targets.nonEmpty) {
-      log.info("Compiling %d protobuf files to %s".format(schemas.size, generatedTargetDirs.mkString(",")))
-      log.debug("protoc options:")
-      protocOptions.map("\t"+_).foreach(log.debug(_))
-      schemas.foreach(schema => log.info("Compiling schema %s" format schema))
+      logger.info("Compiling %d protobuf files to %s".format(schemas.size, generatedTargetDirs.mkString(",")))
+      protocOptions.map("\t"+_).foreach(logger.debug(_))
+      schemas.foreach(schema => logger.info("Compiling schema %s" format schema))
 
-      val exitCode = executeProtoc(protocCommand, schemas, includePaths, protocOptions, targets, pythonExe, log)
+      val exitCode = executeProtoc(protocCommand, schemas, includePaths, protocOptions, targets, pythonExe)
       if (exitCode != 0)
         sys.error("protoc returned exit code: %d" format exitCode)
 
-      log.info("Compiling protobuf")
-      generatedTargetDirs.foreach{ dir =>
-        log.info("Protoc target directory: %s".format(dir.getAbsolutePath))
+      logger.info("Compiling protobuf")
+      generatedTargetDirs.foreach { dir =>
+        logger.info("Protoc target directory: %s".format(dir.getAbsolutePath))
       }
 
-      (targets.flatMap{ot => (ot.outputPath ** ("*.java" | "*.scala")).get}).toSet
+      targets.flatMap { ot =>
+        (PathFinder(ot.outputPath) ** (GlobFilter("*.java") | GlobFilter("*.scala"))).get
+      }.toSet
     } else if (schemas.nonEmpty && targets.isEmpty) {
-      log.info("Protobufs files found, but PB.targets is empty.")
+      logger.info("Protobufs files found, but PB.targets is empty.")
       Set[File]()
     } else {
+      logger.info("PB.targets is found but Protobufs files are empty")
       Set[File]()
     }
   }
@@ -182,38 +181,42 @@ object ProtocPlugin {
     }
   }
 
-  private[this] def sourceGeneratorTask(key: TaskKey[Seq[File]]): Def.Initialize[Task[Seq[File]]] = Def.task {
-    val toInclude = (includeFilter in key).value
-    val toExclude = (excludeFilter in key).value
-    val schemas = (PB.protoSources in key).value.toSet[File].flatMap(srcDir => (srcDir ** (toInclude -- toExclude)).get
-      .map(_.getAbsoluteFile))
-    // Include Scala binary version like "_2.11" for cross building.
-    val cacheFile = (streams in key).value.cacheDirectory / s"protobuf_${scalaBinaryVersion.value}"
+  def sourceGeneratorTask(path: String): Set[File] = {
+//    val toInclude = (includeFilter in key).value
+//    val toExclude = (excludeFilter in key).value
+    val default = new File(path+"/src/main/protobuf")
+    val schemas = List(default).toSet[File].flatMap { srcDir =>
+      (PathFinder(srcDir) ** (GlobFilter("*.proto") /** -- toExclude**/)).get.map(_.getAbsoluteFile)
+    }
+//    // Include Scala binary version like "_2.11" for cross building.
+//    val cacheFile = (streams in key).value.cacheDirectory / s"protobuf_${scalaBinaryVersion.value}"
+    val protocVersion = "-v330"
+    def protocCommand(arg: Seq[String]) = com.github.os72.protocjar.Protoc.runProtoc(protocVersion +: arg.toArray)
     def compileProto(): Set[File] =
       compile(
-        (PB.runProtoc in key).value,
-        schemas,
-        (PB.includePaths in key).value,
-        (PB.protocOptions in key).value,
-        (PB.targets in key).value,
-        (PB.pythonExe in key).value,
-        (PB.deleteTargetDirectory in key).value,
-        (streams in key).value.log)
-
-    val cachedCompile = FileFunction.cached(
-      cacheFile, inStyle = FilesInfo.lastModified, outStyle = FilesInfo.exists) { (in: Set[File]) =>
-      compileProto()
-    }
-
-    if(PB.recompile.value) {
-      compileProto().toSeq
-    } else {
-      cachedCompile(schemas).toSeq
-    }
+        protocCommand = protocCommand,
+        schemas = schemas,
+        includePaths = Seq(default), //PB.includePaths
+        protocOptions = Seq(), //PB.protocOptions
+        targets = Seq(Target(generator = gens.java, outputPath = new File(path+"/compiled_protobuf"), options = Seq.empty)), // PB.targets
+        pythonExe = "python",
+        false
+      )
+//    val cachedCompile = FileFunction.cached(
+//      cacheFile, inStyle = FilesInfo.lastModified, outStyle = FilesInfo.exists) { (in: Set[File]) =>
+//      compileProto()
+//    }
+//
+//    if(PB.recompile.value) {
+    logger.info("Running compileProto")
+    compileProto()
+//    } else {
+//      cachedCompile(schemas).toSeq
+//    }
   }
 
-  private[this] def unpackDependenciesTask(key: TaskKey[UnpackedDependencies]) = Def.task {
-    val extractedFiles = unpack((managedClasspath in (ProtobufConfig, key)).value.map(_.data), (PB.externalIncludePath in key).value, (streams in key).value.log)
-    UnpackedDependencies((PB.externalIncludePath in key).value, extractedFiles)
-  }
+//  private[this] def unpackDependenciesTask(key: TaskKey[UnpackedDependencies]) = Def.task {
+//    val extractedFiles = unpack((managedClasspath in (ProtobufConfig, key)).value.map(_.data), (PB.externalIncludePath in key).value, (streams in key).value.log)
+//    UnpackedDependencies((PB.externalIncludePath in key).value, extractedFiles)
+//  }
 }
