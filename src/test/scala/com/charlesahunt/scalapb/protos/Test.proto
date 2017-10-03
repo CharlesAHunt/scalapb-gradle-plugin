@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package voz.auth.domain;
+
+import "google/protobuf/wrappers.proto";
+
+service Test {
+    rpc Test (TestRequest) returns (TestReply) {}
+}
+
+
+// Request
+message TestRequest {
+    string test = 1;
+}
+
+// Response
+message TestReply {
+    string test = 1;
+}
