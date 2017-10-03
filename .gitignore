@@ -36,3 +36,9 @@ gradle-app.setting
 
 # Cache of project
 .gradletasknamecache
+
+#compiled protobuf
+compiled_protobuf
+compiled_protobuf/
+/compiled_protobuf
+/compiled_protobuf/

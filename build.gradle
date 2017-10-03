@@ -17,21 +17,17 @@ plugins {
     id 'java-gradle-plugin'
     id 'com.gradle.plugin-publish' version '0.9.7'
     id "com.jfrog.bintray" version "1.7.3"
-
-    // Publishing to Artifactory
-    id 'com.jfrog.artifactory' version '4.4.18'
     id 'maven-publish'
 }
 
 apply plugin: "com.github.maiflai.scalatest"
 
 group 'com.charlesahunt'
-version = '1.0.25'
+version = '1.1.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-apply plugin: 'java'
 apply plugin: 'scala'
 apply plugin: 'idea'
 apply plugin: 'maven'
@@ -50,7 +46,6 @@ task wrapper(type: Wrapper) {
 
 dependencies {
     compile gradleApi()
-    compile localGroovy()
     compile 'org.scala-lang:scala-library:2.12.3'
     compile 'org.scala-sbt:io_2.12:1.1.0'
     compile 'com.github.os72:protoc-jar:3.4.0'
@@ -77,27 +72,6 @@ gradlePlugin {
         scalapbPlugin {
             id = 'com.charlesahunt.scalapb'
             implementationClass = 'com.charlesahunt.scalapb.ScalaPBPlugin'
-        }
-    }
-}
-
-bintray {
-    user = System.getenv('BINTRAY_USER')
-    key = System.getenv('BINTRAY_KEY')
-    configurations = ['archives']
-    publish = true
-    pkg {
-        repo = 'maven'
-        name = 'gradle-scalapb'
-        desc = 'Gradle plugin that can run scalapb as a part of your build.'
-        licenses = ['MIT']
-        vcsUrl = 'git@github.com:CharlesAHunt/scalapb-gradle-plugin.git'
-        websiteUrl = 'https://github.com/CharlesAHunt/scalapb-gradle-plugin'
-        issueTrackerUrl = 'https://github.com/CharlesAHunt/scalapb-gradle-plugin/issues'
-        labels = ['scala', 'scalapb', 'protobuf', 'proto']
-        version {
-            name = project.version
-            vcsTag = project.version
         }
     }
 }
