@@ -9,19 +9,29 @@ import scala.collection.JavaConverters._
 
 class ScalaPB extends DefaultTask with LazyLogging {
 
+  private val configuredTargetDir: Option[String] = Option(getProject.getExtensions.findByType(classOf[ScalaPBPluginExtension]).targetDir)
+  val targetDir: String = (
+      if(configuredTargetDir.isEmpty || configuredTargetDir.getOrElse("").isEmpty) None else configuredTargetDir
+    ).getOrElse("target/scala")
+
   @TaskAction
   def compileProtos(): Unit = {
     val internalProtoSources = getProject.getExtensions.findByType(classOf[ScalaPBPluginExtension]).dependentProtoSources.asScala.toList.map(new File(_))
-    val externalProtoSources = getProject.getConfigurations.getByName("compile").asScala.toList.filter(_.getAbsolutePath.contains("protobuf"))
+    val externalProtoSources = getProject.getConfigurations.getByName("compile").asScala.toList.filter( c =>
+      c.getAbsolutePath.contains("protobuf") || c.getAbsolutePath.contains("scalapb")
+    )
     logger.info("Running scalapb compiler plugin for: " + getProject.getName)
-    ProtocPlugin.sourceGeneratorTask(getProject.getProjectDir.getAbsolutePath, internalProtoSources ++ externalProtoSources)
+    ProtocPlugin.sourceGeneratorTask(
+      getProject.getProjectDir.getAbsolutePath,
+      internalProtoSources ++ externalProtoSources,
+      targetDir)
   }
 
   @OutputDirectory
-  def getOutputDir: File = new File(this.getPath+"/outputs")//TODO output dir should be set by config/args
-
+  def getOutputDir: File = new File(s"${getProject.getProjectDir.getAbsolutePath}/$targetDir")
 
 }
+
 
 import sbt.io._
 import java.io.File
@@ -85,15 +95,15 @@ object ProtocPlugin extends LazyLogging {
         (PathFinder(ot.outputPath) ** (GlobFilter("*.java") | GlobFilter("*.scala"))).get
       }.toSet
     } else if (schemas.nonEmpty && targets.isEmpty) {
-      logger.info("Protobufs files found, but PB.targets is empty.")
+      logger.info("Protobuf files(schemas) found, but targets is empty.")
       Set[File]()
     } else {
-      logger.info("PB.targets is found but Protobufs files are empty")
+      logger.info("targets is found but Protobuf files(schemas) are empty")
       Set[File]()
     }
   }
 
-  def sourceGeneratorTask(path: String, protocPaths: List[File]): Set[File] = {
+  def sourceGeneratorTask(path: String, protocPaths: List[File], targetDir: String): Set[File] = {
     val unpackProtosTo = new File(path+"/target/protobuf_external")
     val unpackedProtos = unpack(protocPaths, unpackProtosTo)
     logger.info("unpacked Protos:  "+unpackedProtos)
@@ -111,7 +121,7 @@ object ProtocPlugin extends LazyLogging {
         schemas = schemas,
         includePaths = Nil.+:(default).+:(unpackProtosTo),
         protocOptions = Nil,
-        targets = Seq(Target(generatorAndOpts = scalapb.gen(), outputPath = new File(path+"/compiled_protobuf"))),
+        targets = Seq(Target(generatorAndOpts = scalapb.gen(), outputPath = new File(s"$path/$targetDir"))),
         pythonExe = "python",
         deleteTargetDirectory = true
       )
