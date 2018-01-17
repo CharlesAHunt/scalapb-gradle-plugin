@@ -1,39 +1,32 @@
 //Apply the publishing plugin
-buildscript {
-    repositories {
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "com.gradle.publish:plugin-publish-plugin:0.9.8"
-        classpath "gradle.plugin.com.github.maiflai:gradle-scalatest:0.16"
-    }
-}
+//buildscript {
+//    repositories {
+//        maven {
+//            url "https://plugins.gradle.org/m2/"
+//        }
+//    }
+//    dependencies {
+//        classpath "com.gradle.publish:plugin-publish-plugin:0.9.8"
+//        classpath "gradle.plugin.com.github.maiflai:gradle-scalatest:0.16"
+//    }
+//}
 
 plugins {
     id 'scala'
     id 'idea'
     id 'java-gradle-plugin'
-    id 'com.gradle.plugin-publish' version '0.9.7'
+    id 'com.gradle.plugin-publish' version '0.9.9'
+    id 'com.github.maiflai.scalatest' version '0.19'
     id "com.jfrog.bintray" version "1.7.3"
     id 'maven-publish'
 }
 
-apply plugin: "com.github.maiflai.scalatest"
-
 group 'com.charlesahunt'
-version = '1.1.4'
+version = '1.1.5-SNAPSHOT'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-apply plugin: 'scala'
-apply plugin: 'idea'
-apply plugin: 'maven'
-apply plugin: 'java-gradle-plugin'
-apply plugin: 'com.jfrog.bintray'
-apply plugin: "com.gradle.plugin-publish"
 
 repositories {
     jcenter()
