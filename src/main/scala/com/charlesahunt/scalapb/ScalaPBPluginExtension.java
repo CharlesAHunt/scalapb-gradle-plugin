@@ -7,6 +7,7 @@ public class ScalaPBPluginExtension {
 
     List<String> dependentProtoSources;
     String targetDir;
+    String projectProtoSourceDir;
 
     List<String> getDependentProtoSources() {
         return dependentProtoSources;
@@ -14,6 +15,10 @@ public class ScalaPBPluginExtension {
 
     String getTargetDir() {
         return targetDir;
+    }
+
+    String getProjectProtoSourceDir() {
+        return projectProtoSourceDir;
     }
 
     void setDependentProtoSources(List<String> dependentProtoSources) {
@@ -24,9 +29,16 @@ public class ScalaPBPluginExtension {
         this.targetDir = targetDir;
     }
 
+    void setProjectProtoSourceDir(String projectProtoSourceDir) {
+        this.projectProtoSourceDir = projectProtoSourceDir;
+    }
+
     public ScalaPBPluginExtension() {
         this.dependentProtoSources = new ArrayList<String>();
         this.targetDir = "";
+        this.projectProtoSourceDir = "src/main/protobuf";
     }
+
+
 
 }

@@ -1,10 +1,13 @@
 package com.charlesahunt.scalapb
 
 import java.io.File
+import java.nio.file.Paths
 
 import com.typesafe.scalalogging.LazyLogging
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.{OutputDirectory, TaskAction}
+import sbt.io.{GlobFilter, PathFinder}
+
 import scala.collection.JavaConverters._
 
 class ScalaPB extends DefaultTask with LazyLogging {
@@ -16,14 +19,31 @@ class ScalaPB extends DefaultTask with LazyLogging {
 
   @TaskAction
   def compileProtos(): Unit = {
-    val internalProtoSources = getProject.getExtensions.findByType(classOf[ScalaPBPluginExtension]).dependentProtoSources.asScala.toList.map(new File(_))
-    val externalProtoSources = getProject.getConfigurations.getByName("compile").asScala.toList.filter( c =>
+    val pluginExtensions = getProject.getExtensions.findByType(classOf[ScalaPBPluginExtension])
+
+    // explicit list of includes
+    val internalProtoSources = pluginExtensions.dependentProtoSources.asScala.toList.map(new File(_))
+
+    // potentially proto-containing jars in compile dep path
+    val externalProtoSources = getProject.getConfigurations.getByName("compile").asScala.filter( c =>
       c.getAbsolutePath.contains("protobuf") || c.getAbsolutePath.contains("scalapb")
     )
+
+    // .protos from google's gradle-protobuf plugin after extraction
+    val gradleProtobufSources = getProject.getTasksByName("extractIncludeProto", true).asScala
+        .flatMap(_.getOutputs.getFiles.asScala.map(_.getAbsoluteFile))
+
+    val gradlePluginProtos = (PathFinder(gradleProtobufSources) ** GlobFilter("*.proto"))
+        .get.map(_.getAbsoluteFile)
+
+    // project's proto sources
+    val projectProtoSourceDir = pluginExtensions.projectProtoSourceDir
+
     logger.info("Running scalapb compiler plugin for: " + getProject.getName)
     ProtocPlugin.sourceGeneratorTask(
       getProject.getProjectDir.getAbsolutePath,
-      internalProtoSources ++ externalProtoSources,
+      projectProtoSourceDir,
+      internalProtoSources ++ externalProtoSources ++ gradlePluginProtos,
       targetDir)
   }
 
@@ -66,7 +86,7 @@ object ProtocPlugin extends LazyLogging {
     protocOptions: Seq[String],
     targets: Seq[Target],
     pythonExe: String,
-    deleteTargetDirectory: Boolean,
+    deleteTargetDirectory: Boolean
   ): Set[File] = {
     // Sort by the length of path names to ensure that delete parent directories before deleting child directories.
     val generatedTargetDirs = targets.map(_.outputPath).sortBy(_.getAbsolutePath.length)
@@ -103,17 +123,21 @@ object ProtocPlugin extends LazyLogging {
     }
   }
 
-  def sourceGeneratorTask(path: String, protocPaths: List[File], targetDir: String): Set[File] = {
-    val unpackProtosTo = new File(path+"/target/protobuf_external")
-    val unpackedProtos = unpack(protocPaths, unpackProtosTo)
+  def sourceGeneratorTask(projectRoot: String,
+                          projectProtoSourceDir: String,
+                          protoIncludePaths: List[File],
+                          targetDir: String): Set[File] = {
+    val unpackProtosTo = new File(projectRoot+"/target/protobuf_external")
+    val unpackedProtos = unpack(protoIncludePaths, unpackProtosTo)
     logger.info("unpacked Protos:  "+unpackedProtos)
-    val default = new File(path+"/src/main/protobuf")
+    val default = new File(s"$projectRoot/$projectProtoSourceDir")
+
     val schemas = List(default).toSet[File].flatMap { srcDir =>
       (PathFinder(srcDir) ** (GlobFilter("*.proto") /** -- toExclude**/)).get.map(_.getAbsoluteFile)
     }
 //    // Include Scala binary version like "_2.11" for cross building.
 //    val cacheFile = (streams in key).value.cacheDirectory / s"protobuf_${scalaBinaryVersion.value}"
-    val protocVersion = "-v330"
+    val protocVersion = "-v340"
     def protocCommand(arg: Seq[String]) = com.github.os72.protocjar.Protoc.runProtoc(protocVersion +: arg.toArray)
     def compileProto(): Set[File] =
       compile(
@@ -121,7 +145,7 @@ object ProtocPlugin extends LazyLogging {
         schemas = schemas,
         includePaths = Nil.+:(default).+:(unpackProtosTo),
         protocOptions = Nil,
-        targets = Seq(Target(generatorAndOpts = scalapb.gen(), outputPath = new File(s"$path/$targetDir"))),
+        targets = Seq(Target(generatorAndOpts = scalapb.gen(), outputPath = new File(s"$projectRoot/$targetDir"))),
         pythonExe = "python",
         deleteTargetDirectory = true
       )
@@ -141,7 +165,23 @@ object ProtocPlugin extends LazyLogging {
   private[this] def unpack(deps: Seq[File], extractTarget: File): Seq[File] = {
     IO.createDirectory(extractTarget)
     deps.flatMap { dep =>
-      val seq = IO.unzip(dep, extractTarget, "*.proto").toSeq
+      val seq = {
+        val path = dep.getPath
+
+        // todo maybe handle other kinds of dependency containers here
+        if (path.endsWith(".zip") || path.endsWith(".gzip") || path.endsWith(".gz")) {
+          IO.unzip(dep, extractTarget, "*.proto").toSeq
+        }
+        else if (path.endsWith(".proto")) {
+          val targetName = Paths.get(extractTarget.getAbsolutePath, dep.getName).toFile
+          IO.copy(Seq((dep, targetName)))
+        }
+        else {
+          // not sure what kind of dependency this was
+          Nil
+        }
+      }
+
       if (seq.nonEmpty) logger.debug("Extracted " + seq.mkString("\n * ", "\n * ", ""))
       seq
     }
