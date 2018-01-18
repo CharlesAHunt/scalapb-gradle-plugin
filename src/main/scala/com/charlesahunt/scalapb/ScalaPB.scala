@@ -11,12 +11,11 @@ import sbt.io.{GlobFilter, PathFinder}
 import scala.collection.JavaConverters._
 
 class ScalaPB extends DefaultTask with LazyLogging {
-  private val pluginExtensions: ScalaPBPluginExtension = getProject.getExtensions
+  // needs to be lazy so that the correct options is grabbed at runtime
+  private lazy val pluginExtensions: ScalaPBPluginExtension = getProject.getExtensions
       .findByType(classOf[ScalaPBPluginExtension])
 
-  private val configuredTargetDir: Option[String] = Option(pluginExtensions.targetDir)
-
-  val targetDir: String = if (configuredTargetDir.getOrElse("") == "") "target/scala" else configuredTargetDir.get
+  private lazy val targetDir: String = pluginExtensions.targetDir
 
   @TaskAction
   def compileProtos(): Unit = {
@@ -124,9 +123,6 @@ object ProtocPlugin extends LazyLogging {
                           extractedIncludeDir: String,
                           targetDir: String): Set[File] = {
     val unpackProtosTo = new File(projectRoot, extractedIncludeDir)
-
-    logger.info(s"BUHHHHHHHHH $unpackProtosTo")
-
     val unpackedProtos = unpack(protoIncludePaths, unpackProtosTo)
     logger.info("unpacked Protos:  " + unpackedProtos)
 
@@ -147,7 +143,7 @@ object ProtocPlugin extends LazyLogging {
         protocOptions = Nil,
         targets = Seq(Target(generatorAndOpts = scalapb.gen(), outputPath = new File(s"$projectRoot/$targetDir"))),
         pythonExe = "python",
-        deleteTargetDirectory = false
+        deleteTargetDirectory = true
       )
 //    val cachedCompile = FileFunction.cached(
 //      cacheFile, inStyle = FilesInfo.lastModified, outStyle = FilesInfo.exists) { (in: Set[File]) =>
