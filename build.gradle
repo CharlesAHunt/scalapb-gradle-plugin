@@ -98,3 +98,15 @@ publishing {
         }
     }
 }
+
+bintray {
+    user = System.getenv('BINTRAY_USER')
+    key = System.getenv('BINTRAY_KEY')
+    pkg {
+        repo = 'com.charlesahunt.scalapb'
+        name = 'gradle-scalapb'
+        userOrg = 'com.charlesahunt'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/bintray/gradle-bintray-plugin.git'
+    }
+}
