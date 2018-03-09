@@ -9,6 +9,7 @@ public class ScalaPBPluginExtension {
     String targetDir;
     String projectProtoSourceDir;
     String extractedIncludeDir;
+    Boolean grpc;
 
     List<String> getDependentProtoSources() {
         return dependentProtoSources;
@@ -26,6 +27,8 @@ public class ScalaPBPluginExtension {
         return extractedIncludeDir;
     }
 
+    Boolean getGrpc() { return grpc; }
+
     void setDependentProtoSources(List<String> dependentProtoSources) {
         this.dependentProtoSources = dependentProtoSources;
     }
@@ -42,13 +45,13 @@ public class ScalaPBPluginExtension {
         this.extractedIncludeDir = extractedIncludeDir;
     }
 
+    void setGrpc(boolean grpc) { this.grpc = grpc; }
+
     public ScalaPBPluginExtension() {
         this.dependentProtoSources = new ArrayList<String>();
         this.targetDir = "target/scala";
         this.projectProtoSourceDir = "src/main/protobuf";
         this.extractedIncludeDir = "target/external_protos";
+        this.grpc = true;
     }
-
-
-
 }
