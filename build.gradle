@@ -1,28 +1,15 @@
-//Apply the publishing plugin
-//buildscript {
-//    repositories {
-//        maven {
-//            url "https://plugins.gradle.org/m2/"
-//        }
-//    }
-//    dependencies {
-//        classpath "com.gradle.publish:plugin-publish-plugin:0.9.8"
-//        classpath "gradle.plugin.com.github.maiflai:gradle-scalatest:0.16"
-//    }
-//}
-
 plugins {
     id 'scala'
     id 'idea'
     id 'java-gradle-plugin'
     id 'com.gradle.plugin-publish' version '0.9.9'
     id 'com.github.maiflai.scalatest' version '0.19'
-    id "com.jfrog.bintray" version "1.7.3"
+    id 'com.jfrog.bintray' version '1.7.3'
     id 'maven-publish'
 }
 
 group 'com.charlesahunt'
-version = '1.1.6'
+version = '1.1.7'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -39,19 +26,20 @@ task wrapper(type: Wrapper) {
 
 dependencies {
     compile gradleApi()
-    compile 'org.scala-lang:scala-library:2.12.3'
-    compile 'org.scala-sbt:io_2.12:1.1.0'
-    compile 'com.github.os72:protoc-jar:3.4.0'
-    compile 'com.trueaccord.scalapb:compilerplugin_2.12:0.6.5'
+    compile 'org.scala-lang:scala-library:2.12.5'
+    compile 'org.scala-sbt:io_2.12:1.1.2'
+    compile 'com.github.os72:protoc-jar:3.5.1.1'
     compile 'com.typesafe.scala-logging:scala-logging_2.12:3.7.2'
-    testCompile group: 'org.scalatest', name: 'scalatest_2.12', version: "3.0.1"
-    testRuntime 'org.pegdown:pegdown:1.4.2'
-    zinc 'com.typesafe.zinc:zinc:0.3.13'
-    compile 'com.google.protobuf:protobuf-java:3.4.0'
-    compile 'com.trueaccord.scalapb:scalapb-runtime-grpc_2.12:0.6.6'
-    compile 'com.trueaccord.scalapb:scalapb-runtime_2.12:0.6.6'
+    compile 'com.google.protobuf:protobuf-java:3.5.1'
+    compile 'com.trueaccord.scalapb:compilerplugin_2.12:0.6.7'
+    compile 'com.trueaccord.scalapb:scalapb-runtime-grpc_2.12:0.6.7'
+    compile 'com.trueaccord.scalapb:scalapb-runtime_2.12:0.6.7'
 
+    testCompile group: 'org.scalatest', name: 'scalatest_2.12', version: "3.0.1"
     testCompile gradleTestKit()
+
+    testRuntime 'org.pegdown:pegdown:1.4.2'
+    zinc 'com.typesafe.zinc:zinc:0.3.15'
 }
 
 task sourcesJar(type: Jar) {
@@ -63,20 +51,11 @@ artifacts {
     archives sourcesJar
 }
 
-gradlePlugin {
-    plugins {
-        scalapbPlugin {
-            id = 'com.charlesahunt.scalapb'
-            implementationClass = 'com.charlesahunt.scalapb.ScalaPBPlugin'
-        }
-    }
-}
-
 pluginBundle {
     website = 'https://github.com/CharlesAHunt/scalapb-gradle-plugin'
     vcsUrl = 'git@github.com:CharlesAHunt/scalapb-gradle-plugin.git'
     tags = ['scala', 'scalapb', 'proto', 'protobuf']
-    
+
     plugins {
         scalapbPlugin {
             id = 'com.charlesahunt.scalapb'
