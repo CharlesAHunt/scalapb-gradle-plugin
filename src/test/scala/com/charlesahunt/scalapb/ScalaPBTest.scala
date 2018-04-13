@@ -1,37 +1,39 @@
 package com.charlesahunt.scalapb
+
 import java.io.File
 
 import org.scalatest.WordSpec
 import protocbridge.Target
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.GradleRunner
+import org.scalatest.WordSpec
+import java.io._
 
+import org.gradle.api.internal.GradleInternal
+import org.gradle.api.internal.initialization.ClassLoaderScope
+import org.gradle.api.internal.project.{DefaultProject, ProjectInternal}
+import org.gradle.groovy.scripts.ScriptSource
+import org.gradle.internal.service.scopes.ServiceRegistryFactory
+import org.gradle.testfixtures.ProjectBuilder
+import org.gradle.testkit.runner.TaskOutcome._
+import org.junit.rules.TemporaryFolder
+
+//TODO
 class ScalaPBTest extends WordSpec {
+
+  val testProjectDir = new TemporaryFolder
 
   "Protoc" should {
     "compile Scala code from the given protos" in {
 
-      val protocVersion = "-v330"
+      val result = GradleRunner.create
+        .withProjectDir(testProjectDir.getRoot)
+        .withArguments("scalapb")
+        .withPluginClasspath()
+        .build
 
-      def protocCommand(arg: Seq[String]) = com.github.os72.protocjar.Protoc.runProtoc(protocVersion +: arg.toArray)
+      val taskResult = result.task(":scalapb")
 
-      val targets = List(Target.apply(scalapb.gen(),
-        new File("src/test/compiled_protobuf")))
-
-      val path = "src/test/scala/com/charlesahunt/scalapb/protos"
-      val incPath = List(s"-I/Users/charleshunt/projects/scalapb-gradle-plugin/src/test/scala/com/charlesahunt/scalapb/protos",
-        s"-I$path/protobuf_external/google/protobuf/descriptor.proto", s"-I$path/protobuf_external")
-      val schemas = Set(new File(s"$path/Auth.proto"), new File(s"$path/Test.proto"))
-
-      try {
-        protocbridge.ProtocBridge.run(protocCommand, targets,
-          incPath ++ schemas.map(_.getCanonicalPath),
-          pluginFrontend = protocbridge.frontend.PluginFrontend.newInstance(pythonExe = "python")
-        )
-      } catch {
-        case e: Exception =>
-          throw new RuntimeException("error occurred while compiling protobuf files: %s" format (e.getMessage), e)
-      }
     }
   }
 }
-
-

@@ -53,7 +53,8 @@ class ScalaPB extends DefaultTask with LazyLogging {
       internalProtoSources ++ externalProtoSources ++ extractedIncludeDirs,
       pluginExtensions.extractedIncludeDir,
       targetDir,
-      grpc)
+      grpc
+    )
   }
 
   @OutputDirectory

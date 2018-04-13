@@ -3,13 +3,13 @@ plugins {
     id 'idea'
     id 'java-gradle-plugin'
     id 'com.gradle.plugin-publish' version '0.9.9'
-    id 'com.github.maiflai.scalatest' version '0.19'
+    id 'com.github.maiflai.scalatest' version '0.21'
     id 'com.jfrog.bintray' version '1.7.3'
     id 'maven-publish'
 }
 
 group 'com.charlesahunt'
-version = '1.1.7'
+version = '1.1.8'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -21,7 +21,7 @@ repositories {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = "4.2"
+    gradleVersion = "4.6"
 }
 
 dependencies {
@@ -35,10 +35,11 @@ dependencies {
     compile 'com.trueaccord.scalapb:scalapb-runtime-grpc_2.12:0.6.7'
     compile 'com.trueaccord.scalapb:scalapb-runtime_2.12:0.6.7'
 
-    testCompile group: 'org.scalatest', name: 'scalatest_2.12', version: "3.0.1"
+    testCompile 'junit:junit:4.12'
+    testCompile 'org.scalatest:scalatest_2.12:3.0.1'
+    testRuntime 'org.pegdown:pegdown:1.4.2'
     testCompile gradleTestKit()
 
-    testRuntime 'org.pegdown:pegdown:1.4.2'
     zinc 'com.typesafe.zinc:zinc:0.3.15'
 }
 
