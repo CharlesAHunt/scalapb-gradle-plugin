@@ -90,7 +90,7 @@ object ProtocPlugin extends LazyLogging {
       val incPath = includePaths.map("-I" + _.getCanonicalPath)
       protocbridge.ProtocBridge.run(protocCommand, targets,
         incPath ++ protocOptions ++ schemas.map(_.getCanonicalPath),
-          pluginFrontend = protocbridge.frontend.PluginFrontend.newInstance(pythonExe=pythonExe)
+          pluginFrontend = protocbridge.frontend.PluginFrontend.newInstance
       )
     } catch { case e: Exception =>
       throw new RuntimeException("error occurred while compiling protobuf files: %s" format(e.getMessage), e)
