@@ -12,3 +12,7 @@ scalapbConfig {
     targetDir = "/target/scala/managed"
 }
 ```
+
+ 
+ScalaPB will try to download a current Protoc version, which can cause some trouble. 
+In this case set `embeddedProtoc = true` within `scalapbConfig`.
