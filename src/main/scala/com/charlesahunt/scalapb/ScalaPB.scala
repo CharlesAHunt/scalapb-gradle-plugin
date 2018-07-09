@@ -14,7 +14,8 @@ import org.gradle.api.internal.file.collections.SimpleFileCollection
 import org.gradle.api.tasks.InputFiles
 
 class ScalaPB extends DefaultTask with LazyLogging {
-  // needs to be lazy so that the correct options is grabbed at runtime
+
+  //Needs to be lazy so that the correct options are grabbed at runtime
   private lazy val pluginExtensions: ScalaPBPluginExtension = getProject.getExtensions
       .findByType(classOf[ScalaPBPluginExtension])
 
@@ -35,6 +36,8 @@ class ScalaPB extends DefaultTask with LazyLogging {
     // explicit list of includes
     val internalProtoSources = pluginExtensions.dependentProtoSources.asScala.toList.map(new File(_))
 
+    val protocVersion = pluginExtensions.protocVersion
+
     // potentially proto-containing jars in compile dep path
     val externalProtoSources = getProject.getConfigurations.getByName("compile").asScala.filter( c =>
       c.getAbsolutePath.contains("protobuf") || c.getAbsolutePath.contains("scalapb")
@@ -53,7 +56,8 @@ class ScalaPB extends DefaultTask with LazyLogging {
       internalProtoSources ++ externalProtoSources ++ extractedIncludeDirs,
       pluginExtensions.extractedIncludeDir,
       targetDir,
-      grpc
+      grpc,
+      protocVersion
     )
   }
 
@@ -93,7 +97,7 @@ object ProtocPlugin extends LazyLogging {
           pluginFrontend = protocbridge.frontend.PluginFrontend.newInstance
       )
     } catch { case e: Exception =>
-      throw new RuntimeException("error occurred while compiling protobuf files: %s" format(e.getMessage), e)
+      throw new RuntimeException("Error occurred while compiling protobuf files: %s" format(e.getMessage), e)
   }
 
   private[this] def compile(
@@ -107,7 +111,7 @@ object ProtocPlugin extends LazyLogging {
   ): Set[File] = {
     // Sort by the length of path names to ensure that delete parent directories before deleting child directories.
     val generatedTargetDirs = targets.map(_.outputPath).sortBy(_.getAbsolutePath.length)
-    generatedTargetDirs.foreach{ targetDir =>
+    generatedTargetDirs.foreach { targetDir =>
       if (deleteTargetDirectory)
         IO.delete(targetDir)
 
@@ -145,10 +149,11 @@ object ProtocPlugin extends LazyLogging {
                           protoIncludePaths: List[File],
                           extractedIncludeDir: String,
                           targetDir: String,
-                          grpc: Boolean): Set[File] = {
+                          grpc: Boolean,
+                          protocVersion: String): Set[File] = {
     val unpackProtosTo = new File(projectRoot, extractedIncludeDir)
     val unpackedProtos = unpack(protoIncludePaths, unpackProtosTo)
-    logger.info("unpacked Protos:  " + unpackedProtos)
+    logger.info("Unpacked Protos:  " + unpackedProtos)
 
     val absoluteSourceDir = new File(s"$projectRoot/$projectProtoSourceDir")
 
@@ -156,7 +161,6 @@ object ProtocPlugin extends LazyLogging {
 
 //    // Include Scala binary version like "_2.11" for cross building.
 //    val cacheFile = (streams in key).value.cacheDirectory / s"protobuf_${scalaBinaryVersion.value}"
-    val protocVersion = "-v330"
     def protocCommand(arg: Seq[String]) = com.github.os72.protocjar.Protoc.runProtoc(protocVersion +: arg.toArray)
     def compileProto(): Set[File] =
       compile(
@@ -182,6 +186,7 @@ object ProtocPlugin extends LazyLogging {
   }
 
   private[this] def unpack(deps: Seq[File], extractTarget: File): Seq[File] = {
+    logger.info("unpacking protos: " + deps.toString())
     IO.createDirectory(extractTarget)
     deps.flatMap { dep =>
       val seq = {

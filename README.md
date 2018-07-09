@@ -10,5 +10,6 @@ You can configure the plugin using:
 scalapbConfig {
     dependentProtoSources = ["path/to/external/proto/sources", "or/some/other/path"]
     targetDir = "/target/scala/managed"
+    protocVersion = "-v360"
 }
 ```
