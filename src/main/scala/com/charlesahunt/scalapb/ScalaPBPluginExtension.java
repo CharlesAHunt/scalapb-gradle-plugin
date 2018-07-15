@@ -6,6 +6,7 @@ import java.util.List;
 public class ScalaPBPluginExtension {
 
     List<String> dependentProtoSources;
+    String protocVersion;
     String targetDir;
     String projectProtoSourceDir;
     String extractedIncludeDir;
@@ -14,6 +15,10 @@ public class ScalaPBPluginExtension {
 
     List<String> getDependentProtoSources() {
         return dependentProtoSources;
+    }
+
+    String getProtocVersion() {
+        return protocVersion;
     }
 
     String getTargetDir() {
@@ -36,6 +41,10 @@ public class ScalaPBPluginExtension {
         this.dependentProtoSources = dependentProtoSources;
     }
 
+    void setProtocVersion(String protocVersion) {
+        this.protocVersion = protocVersion;
+    }
+
     void setTargetDir(String targetDir) {
         this.targetDir = targetDir;
     }
@@ -54,6 +63,7 @@ public class ScalaPBPluginExtension {
 
     public ScalaPBPluginExtension() {
         this.dependentProtoSources = new ArrayList<String>();
+        this.protocVersion = "-v360";
         this.targetDir = "target/scala";
         this.projectProtoSourceDir = "src/main/protobuf";
         this.extractedIncludeDir = "target/external_protos";
