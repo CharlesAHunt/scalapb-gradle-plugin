@@ -11,6 +11,7 @@ public class ScalaPBPluginExtension {
     String projectProtoSourceDir;
     String extractedIncludeDir;
     Boolean grpc;
+    Boolean embeddedProtoc;
 
     List<String> getDependentProtoSources() {
         return dependentProtoSources;
@@ -34,6 +35,8 @@ public class ScalaPBPluginExtension {
 
     Boolean getGrpc() { return grpc; }
 
+    Boolean getEmbeddedProtoc() { return embeddedProtoc; }
+
     void setDependentProtoSources(List<String> dependentProtoSources) {
         this.dependentProtoSources = dependentProtoSources;
     }
@@ -56,6 +59,8 @@ public class ScalaPBPluginExtension {
 
     void setGrpc(boolean grpc) { this.grpc = grpc; }
 
+    void setEmbeddedProtoc(boolean embeddedProtoc) { this.embeddedProtoc = embeddedProtoc; }
+
     public ScalaPBPluginExtension() {
         this.dependentProtoSources = new ArrayList<String>();
         this.protocVersion = "-v360";
@@ -63,5 +68,6 @@ public class ScalaPBPluginExtension {
         this.projectProtoSourceDir = "src/main/protobuf";
         this.extractedIncludeDir = "target/external_protos";
         this.grpc = true;
+        this.embeddedProtoc = false;
     }
 }

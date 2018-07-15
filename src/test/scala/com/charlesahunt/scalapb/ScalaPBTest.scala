@@ -15,7 +15,6 @@ class ScalaPBTest extends WordSpec {
   "Protoc" should {
     "generate Scala classes from the given protos" in {
 
-
       val currentPath = new java.io.File(".").getCanonicalPath + "/src/test/"
       val files = ProtocPlugin.sourceGeneratorTask(
         currentPath, //getProject.getProjectDir.getAbsolutePath,
@@ -24,7 +23,24 @@ class ScalaPBTest extends WordSpec {
         "protosCompiled", //pluginExtensions.extractedIncludeDir,
         "protosTarget", //targetDir,
         true,//grpc
-        "-v360"
+        "-v360",
+        true
+      )
+
+      assert(files.nonEmpty)
+    }
+
+    "..." in {
+      val currentPath = new java.io.File(".").getCanonicalPath + "/src/test/"
+      val files = ProtocPlugin.sourceGeneratorTask(
+        currentPath, //getProject.getProjectDir.getAbsolutePath,
+        "resources/protos", //projectProtoSourceDir,
+        List(),// internalProtoSources ++ externalProtoSources ++ extractedIncludeDirs,
+        "protosCompiled", //pluginExtensions.extractedIncludeDir,
+        "protosTarget", //targetDir,
+        true,//grpc
+        "-v360",
+        false
       )
 
       assert(files.nonEmpty)

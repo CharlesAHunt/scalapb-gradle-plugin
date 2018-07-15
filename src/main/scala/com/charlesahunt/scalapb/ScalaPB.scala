@@ -3,6 +3,7 @@ package com.charlesahunt.scalapb
 import java.io.File
 import java.nio.file.Paths
 
+import com.github.os72.protocjar.ProtocVersion
 import com.typesafe.scalalogging.LazyLogging
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.{OutputDirectory, TaskAction}
@@ -48,6 +49,7 @@ class ScalaPB extends DefaultTask with LazyLogging {
 
     val projectProtoSourceDir = pluginExtensions.projectProtoSourceDir
     val grpc = pluginExtensions.grpc
+    val embeddedProtoc = pluginExtensions.embeddedProtoc
 
     logger.info("Running scalapb compiler plugin for: " + getProject.getName)
     ProtocPlugin.sourceGeneratorTask(
@@ -57,7 +59,8 @@ class ScalaPB extends DefaultTask with LazyLogging {
       pluginExtensions.extractedIncludeDir,
       targetDir,
       grpc,
-      protocVersion
+      protocVersion,
+      embeddedProtoc
     )
   }
 
@@ -74,13 +77,10 @@ object ProtocPlugin extends LazyLogging {
 
   case class UnpackedDependencies(dir: File, files: Seq[File])
 
-  def collectProtoSources(absoluteSourceDir: File): Set[File] = {
-    val schemas = List(absoluteSourceDir).toSet[File].flatMap { srcDir =>
+  def collectProtoSources(absoluteSourceDir: File): Set[File] =
+    List(absoluteSourceDir).toSet[File].flatMap { srcDir =>
       (PathFinder(srcDir) ** (GlobFilter("*.proto") /** -- toExclude**/)).get.map(_.getAbsoluteFile)
     }
-
-    schemas
-  }
 
   private[this] def executeProtoc(
     protocCommand: Seq[String] => Int,
@@ -150,7 +150,8 @@ object ProtocPlugin extends LazyLogging {
                           extractedIncludeDir: String,
                           targetDir: String,
                           grpc: Boolean,
-                          protocVersion: String): Set[File] = {
+                          protocVersion: String,
+                          embeddedProtoc: Boolean): Set[File] = {
     val unpackProtosTo = new File(projectRoot, extractedIncludeDir)
     val unpackedProtos = unpack(protoIncludePaths, unpackProtosTo)
     logger.info("Unpacked Protos:  " + unpackedProtos)
@@ -167,7 +168,7 @@ object ProtocPlugin extends LazyLogging {
         protocCommand = protocCommand,
         schemas = schemas,
         includePaths = Nil.+:(absoluteSourceDir).+:(unpackProtosTo),
-        protocOptions = Nil,
+        protocOptions =  if( embeddedProtoc ) Seq(s"-v${ProtocVersion.PROTOC_VERSION.mVersion}") else Nil,
         targets = Seq(Target(generatorAndOpts = scalapb.gen(grpc = grpc), outputPath = new File(s"$projectRoot/$targetDir"))),
         pythonExe = "python",
         deleteTargetDirectory = true
@@ -186,7 +187,7 @@ object ProtocPlugin extends LazyLogging {
   }
 
   private[this] def unpack(deps: Seq[File], extractTarget: File): Seq[File] = {
-    logger.info("unpacking protos: " + deps.toString())
+    logger.info("Unpacking protos: " + deps.toString())
     IO.createDirectory(extractTarget)
     deps.flatMap { dep =>
       val seq = {
@@ -204,11 +205,9 @@ object ProtocPlugin extends LazyLogging {
           IO.copyDirectory(dep, extractTarget, overwrite = true, preserveLastModified = true)
 
           // recalculate destination files, just like copyDirectory
-          val dests = PathFinder(dep).allPaths.get.flatMap { p =>
-            Path.rebase(dep, extractTarget)(p)
+          PathFinder(dep).allPaths.get.flatMap { file =>
+            Path.rebase(dep, extractTarget)(file)
           }
-
-          dests
         }
         else {
           // not sure what kind of dependency this was
@@ -216,7 +215,7 @@ object ProtocPlugin extends LazyLogging {
         }
       }
 
-      if (seq.nonEmpty) logger.debug("Extracted " + seq.mkString("\n * ", "\n * ", ""))
+      logger.debug("Extracted " + seq.mkString("\n * ", "\n * ", ""))
       seq
     }
   }
