@@ -14,3 +14,7 @@ scalapbConfig {
     protocVersion = "-v360"
 }
 ```
+
+ 
+ScalaPB will try to download a current Protoc version, which can cause some trouble. 
+In this case set `embeddedProtoc = true` within `scalapbConfig`.

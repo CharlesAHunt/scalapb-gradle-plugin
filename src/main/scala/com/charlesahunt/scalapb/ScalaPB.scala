@@ -151,7 +151,8 @@ object ProtocPlugin extends LazyLogging {
                           targetDir: String,
                           grpc: Boolean,
                           protocVersion: String,
-                          embeddedProtoc: Boolean): Set[File] = {
+                          embeddedProtoc: Boolean
+                         ): Set[File] = {
     val unpackProtosTo = new File(projectRoot, extractedIncludeDir)
     val unpackedProtos = unpack(protoIncludePaths, unpackProtosTo)
     logger.info("Unpacked Protos:  " + unpackedProtos)
