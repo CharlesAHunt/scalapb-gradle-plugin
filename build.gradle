@@ -9,6 +9,7 @@ plugins {
 
 
 group 'com.charlesahunt'
+
 version = '1.2.0'
 
 sourceCompatibility = 1.8

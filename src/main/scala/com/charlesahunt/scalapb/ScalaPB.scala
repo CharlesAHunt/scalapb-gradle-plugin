@@ -3,6 +3,7 @@ package com.charlesahunt.scalapb
 import java.io.File
 import java.nio.file.Paths
 
+import com.github.os72.protocjar.ProtocVersion
 import com.typesafe.scalalogging.LazyLogging
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.{OutputDirectory, TaskAction}
@@ -48,6 +49,7 @@ class ScalaPB extends DefaultTask with LazyLogging {
 
     val projectProtoSourceDir = pluginExtensions.projectProtoSourceDir
     val grpc = pluginExtensions.grpc
+    val embeddedProtoc = pluginExtensions.embeddedProtoc
 
     logger.info("Running scalapb compiler plugin for: " + getProject.getName)
     ProtocPlugin.sourceGeneratorTask(
@@ -167,7 +169,7 @@ object ProtocPlugin extends LazyLogging {
         protocCommand = protocCommand,
         schemas = schemas,
         includePaths = Nil.+:(absoluteSourceDir).+:(unpackProtosTo),
-        protocOptions = Nil,
+        protocOptions =  if( embeddedProtoc ) Seq(s"-v${ProtocVersion.PROTOC_VERSION.mVersion}") else Nil,
         targets = Seq(Target(generatorAndOpts = scalapb.gen(grpc = grpc), outputPath = new File(s"$projectRoot/$targetDir"))),
         pythonExe = "python",
         deleteTargetDirectory = true
