@@ -6,13 +6,11 @@ import java.nio.file.Paths
 import com.github.os72.protocjar.ProtocVersion
 import com.typesafe.scalalogging.LazyLogging
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.{OutputDirectory, TaskAction}
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.{InputFiles, OutputDirectory, TaskAction}
 import sbt.io.{GlobFilter, PathFinder}
 
 import scala.collection.JavaConverters._
-import org.gradle.api.file.FileCollection
-import org.gradle.api.internal.file.collections.SimpleFileCollection
-import org.gradle.api.tasks.InputFiles
 
 class ScalaPB extends DefaultTask with LazyLogging {
 
@@ -25,11 +23,12 @@ class ScalaPB extends DefaultTask with LazyLogging {
   @InputFiles
   def getSourceFiles: FileCollection = {
     val projectProtoSourceDir = pluginExtensions.projectProtoSourceDir
-    val projectRoot = getProject.getProjectDir.getAbsolutePath
+    val project = getProject
+    val projectRoot = project.getProjectDir.getAbsolutePath
     val absoluteSourceDir = new File(s"$projectRoot/$projectProtoSourceDir")
     val schemas = ProtocPlugin.collectProtoSources(absoluteSourceDir)
 
-    new SimpleFileCollection(schemas.toList.asJava)
+    project.files(schemas.toList.asJava)
   }
 
   @TaskAction
@@ -85,9 +84,10 @@ class ScalaPB extends DefaultTask with LazyLogging {
 }
 
 
-import sbt.io._
 import java.io.File
+
 import protocbridge.Target
+import sbt.io._
 
 object ProtocPlugin extends LazyLogging {
 
@@ -95,7 +95,8 @@ object ProtocPlugin extends LazyLogging {
 
   def collectProtoSources(absoluteSourceDir: File): Set[File] =
     List(absoluteSourceDir).toSet[File].flatMap { srcDir =>
-      (PathFinder(srcDir) ** (GlobFilter("*.proto") /** -- toExclude**/)).get.map(_.getAbsoluteFile)
+      (PathFinder(srcDir) ** GlobFilter("*.proto") /** -- toExclude**/)
+        .get.map(_.getAbsoluteFile)
     }
 
   private[this] def executeProtoc(
@@ -112,7 +113,7 @@ object ProtocPlugin extends LazyLogging {
           pluginFrontend = protocbridge.frontend.PluginFrontend.newInstance
       )
     } catch { case e: Exception =>
-      throw new RuntimeException("Error occurred while compiling protobuf files: %s" format(e.getMessage), e)
+      throw new RuntimeException("Error occurred while compiling protobuf files: %s" format e.getMessage, e)
   }
 
   private[this] def compile(
@@ -134,7 +135,7 @@ object ProtocPlugin extends LazyLogging {
 
     if (schemas.nonEmpty && targets.nonEmpty) {
       logger.info("Compiling %d protobuf files to %s".format(schemas.size, generatedTargetDirs.mkString(",")))
-      protocOptions.map("\t"+_).foreach(logger.debug(_))
+      protocOptions.map("\t" + _) foreach (logger debug _)
       schemas.foreach(schema => logger.info("Compiling schema %s" format schema))
 
       val exitCode = executeProtoc(protocCommand, schemas, includePaths, protocOptions, targets)

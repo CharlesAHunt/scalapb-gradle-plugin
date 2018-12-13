@@ -24,7 +24,7 @@ class ScalaPBTest extends WordSpec {
         "protosCompiled", //pluginExtensions.extractedIncludeDir,
         "protosTarget", //targetDir,
         true,//grpc
-        "-v360",
+        "-v361",
         false,
         false
       )
@@ -42,7 +42,7 @@ class ScalaPBTest extends WordSpec {
         "protosCompiled", //pluginExtensions.extractedIncludeDir,
         "protosTarget", //targetDir,
         true,//grpc
-        "-v360",
+        "-v361",
         true,
         false
       )

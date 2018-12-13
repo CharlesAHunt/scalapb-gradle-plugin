@@ -41,4 +41,7 @@ gradle-app.setting
 compiled_protobuf
 compiled_protobuf/
 /compiled_protobuf
-/compiled_protobuf/
+/compiled_protobuf/bin/ 
+.project 
+.classpath 
+.settings 
