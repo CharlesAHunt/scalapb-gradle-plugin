@@ -10,23 +10,16 @@ plugins {
 
 group 'com.charlesahunt'
 
-version = '1.2.1'
-
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+version = '1.2.2-SNAPSHOT'
 
 repositories {
     jcenter()
     mavenCentral()
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = "4.8.1"
-}
-
 dependencies {
     compile gradleApi()
-    compile 'org.scala-lang:scala-library:2.12.5'
+    compile 'org.scala-lang:scala-library:2.12.8'
     compile 'org.scala-sbt:io_2.12:1.1.6'
     compile 'com.github.os72:protoc-jar:3.5.1.1'
     compile 'com.typesafe.scala-logging:scala-logging_2.12:3.7.2'
@@ -36,9 +29,6 @@ dependencies {
     compile 'com.thesamet.scalapb:scalapb-runtime_2.12:0.7.4'
 
     testCompile 'junit:junit:4.12'
-//    testCompile 'org.scalatest:scalatest_2.12:3.0.1'
-//    testRuntime 'org.pegdown:pegdown:1.4.2'
-
     testCompile 'org.scalatest:scalatest_2.12:3.0.1'
     testRuntime 'org.pegdown:pegdown:1.4.2'
 
