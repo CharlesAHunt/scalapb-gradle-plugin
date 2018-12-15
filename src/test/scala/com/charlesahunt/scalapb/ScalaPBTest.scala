@@ -20,6 +20,7 @@ class ScalaPBTest extends WordSpec {
         currentPath, //getProject.getProjectDir.getAbsolutePath,
         "resources/protos", //projectProtoSourceDir,
         List(),// internalProtoSources ++ externalProtoSources ++ extractedIncludeDirs,
+        "prefix",
         "protosCompiled", //pluginExtensions.extractedIncludeDir,
         "protosTarget", //targetDir,
         true,//grpc
@@ -37,6 +38,7 @@ class ScalaPBTest extends WordSpec {
         currentPath, //getProject.getProjectDir.getAbsolutePath,
         "resources/protos", //projectProtoSourceDir,
         List(),// internalProtoSources ++ externalProtoSources ++ extractedIncludeDirs,
+        "prefix",
         "protosCompiled", //pluginExtensions.extractedIncludeDir,
         "protosTarget", //targetDir,
         true,//grpc

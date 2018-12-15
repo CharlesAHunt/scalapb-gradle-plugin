@@ -207,9 +207,7 @@ object ProtocPlugin extends LazyLogging {
 //    if(PB.recompile.value) {
     logger.info("Running compileProto")
     compileProto()
-//    } else {
-//      cachedCompile(schemas).toSeq
-//    }
+//    } else cachedCompile(schemas).toSeq
   }
 
   private[this] def unpack(deps: Seq[File], gradleProtobufExtractedPrefix: String,
@@ -220,7 +218,7 @@ object ProtocPlugin extends LazyLogging {
       val seq = {
         val path = dep.getPath
 
-        // todo maybe handle other kinds of dependency containers here
+        //TODO: maybe handle other kinds of dependency containers here
         if (path.endsWith(".zip") || path.endsWith(".gzip") || path.endsWith(".gz") || path.endsWith(".jar")) {
           IO.unzip(dep, extractTarget, "*.proto").toSeq
         }
@@ -231,7 +229,6 @@ object ProtocPlugin extends LazyLogging {
           } else {
             // otherwise just copy from wherever this came from
             Paths.get(extractTarget.getAbsolutePath, dep.getName).toFile
-
           }
           IO.copy(Seq((dep, target)))
         }
@@ -244,8 +241,7 @@ object ProtocPlugin extends LazyLogging {
           }
         }
         else {
-          // not sure what kind of dependency this was
-          logger.warn(s"unknown dependency type: $dep")
+          logger.warn(s"Unknown dependency type: $dep")
           Nil
         }
       }
