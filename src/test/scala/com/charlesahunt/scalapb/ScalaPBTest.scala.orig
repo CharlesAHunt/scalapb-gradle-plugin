@@ -25,7 +25,10 @@ class ScalaPBTest extends WordSpec {
         "protosTarget", //targetDir,
         true,//grpc
         "-v361",
+<<<<<<< HEAD
+=======
         false,
+>>>>>>> root-origin
         false
       )
 
@@ -43,8 +46,12 @@ class ScalaPBTest extends WordSpec {
         "protosTarget", //targetDir,
         true,//grpc
         "-v361",
+<<<<<<< HEAD
+        true
+=======
         true,
         false
+>>>>>>> root-origin
       )
 
       assert(files.nonEmpty)

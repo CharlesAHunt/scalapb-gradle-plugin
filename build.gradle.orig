@@ -10,10 +10,14 @@ plugins {
 
 group 'com.charlesahunt'
 
+<<<<<<< HEAD
+version = '1.2.2-SNAPSHOT'
+=======
 version = '1.2.2'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+>>>>>>> root-origin
 
 repositories {
     jcenter()

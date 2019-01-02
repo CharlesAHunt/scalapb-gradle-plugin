@@ -10,6 +10,25 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public class ScalaPBPluginExtension {
+<<<<<<< HEAD
+
+    public List<String> dependentProtoSources;
+    public String protocVersion;
+    public String targetDir;
+    public String projectProtoSourceDir;
+    public String extractedIncludeDir;
+    public Boolean grpc;
+    public Boolean embeddedProtoc;
+
+    public ScalaPBPluginExtension() {
+        dependentProtoSources = new ArrayList<>();
+        protocVersion = "-v360";
+        targetDir = "target/scala";
+        projectProtoSourceDir = "src/main/protobuf";
+        extractedIncludeDir = "target/external_protos";
+        grpc = true;
+        embeddedProtoc = false;
+=======
     /**
      * Things to explicitly include as dependent proto sources. These are explicitly recompiled into
      * scala. These may be .jar, .proto, .zip, almost any archive that could contain protos
@@ -138,5 +157,6 @@ public class ScalaPBPluginExtension {
         // BY CONVENTION, this is usually build/extracted-protos/$sourceSet
         // where sourceSet is usually main
         this.gradleProtobufExtractedPrefix = "build/extracted-include-protos/main";
+>>>>>>> root-origin
     }
 }

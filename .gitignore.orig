@@ -44,7 +44,14 @@ gradle-app.setting
 compiled_protobuf
 compiled_protobuf/
 /compiled_protobuf
+<<<<<<< HEAD
+/compiled_protobuf/bin/ 
+.project 
+.classpath 
+.settings 
+=======
 /compiled_protobuf
 
 # output from Gradle 5
 bin/
+>>>>>>> root-origin
