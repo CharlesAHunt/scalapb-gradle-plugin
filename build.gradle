@@ -20,10 +20,6 @@ repositories {
     mavenCentral()
 }
 
-task wrapper(type: Wrapper) {
-    gradleVersion = "5.0.0"
-}
-
 dependencies {
     compile gradleApi()
     compile 'org.scala-lang:scala-library:2.12.8'
