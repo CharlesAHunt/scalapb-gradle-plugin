@@ -6,13 +6,11 @@ import java.nio.file.Paths
 import com.github.os72.protocjar.ProtocVersion
 import com.typesafe.scalalogging.LazyLogging
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.{OutputDirectory, TaskAction}
+import org.gradle.api.file.FileCollection
+import org.gradle.api.tasks.{InputFiles, OutputDirectory, TaskAction}
 import sbt.io.{GlobFilter, PathFinder}
 
 import scala.collection.JavaConverters._
-import org.gradle.api.file.FileCollection
-import org.gradle.api.internal.file.collections.SimpleFileCollection
-import org.gradle.api.tasks.InputFiles
 
 class ScalaPB extends DefaultTask with LazyLogging {
 
@@ -29,7 +27,7 @@ class ScalaPB extends DefaultTask with LazyLogging {
     val absoluteSourceDir = new File(s"$projectRoot/$projectProtoSourceDir")
     val schemas = ProtocPlugin.collectProtoSources(absoluteSourceDir)
 
-    new SimpleFileCollection(schemas.toList.asJava)
+    getProject.files(schemas.toList.asJava)
   }
 
   @TaskAction
@@ -85,8 +83,9 @@ class ScalaPB extends DefaultTask with LazyLogging {
 }
 
 
-import sbt.io._
 import java.io.File
+
+import sbt.io._
 import protocbridge.Target
 
 object ProtocPlugin extends LazyLogging {
