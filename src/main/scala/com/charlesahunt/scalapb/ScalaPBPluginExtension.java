@@ -1,13 +1,10 @@
 package com.charlesahunt.scalapb;
 
-import org.gradle.api.file.FileTreeElement;
-import org.gradle.api.specs.Spec;
 import org.gradle.api.tasks.util.PatternFilterable;
 import org.gradle.api.tasks.util.PatternSet;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Pattern;
 
 public class ScalaPBPluginExtension {
     /**
@@ -62,65 +59,65 @@ public class ScalaPBPluginExtension {
     String gradleProtobufExtractedPrefix;
 
 
-    List<String> getExternalProtoSources() {
+    public List<String> getExternalProtoSources() {
         return externalProtoSources;
     }
 
-    String getProtocVersion() {
+    public String getProtocVersion() {
         return protocVersion;
     }
 
-    String getTargetDir() {
+    public String getTargetDir() {
         return targetDir;
     }
 
-    String getProjectProtoSourceDir() {
+    public String getProjectProtoSourceDir() {
         return projectProtoSourceDir;
     }
 
-    String getExtractedIncludeDir() {
+    public String getExtractedIncludeDir() {
         return extractedIncludeDir;
     }
 
-    Boolean getGrpc() { return grpc; }
+    public Boolean getGrpc() { return grpc; }
 
-    Boolean getEmbeddedProtoc() { return embeddedProtoc; }
+    public Boolean getEmbeddedProtoc() { return embeddedProtoc; }
 
-    Boolean getJavaConversions() { return javaConversions; }
+    public Boolean getJavaConversions() { return javaConversions; }
 
-    PatternSet getDependencySpec() { return dependencySpec; }
+    public PatternSet getDependencySpec() { return dependencySpec; }
 
-    String getGradleProtobufExtractedPrefix() { return gradleProtobufExtractedPrefix; }
+    public String getGradleProtobufExtractedPrefix() { return gradleProtobufExtractedPrefix; }
 
-    void setExternalProtoSources(List<String> externalProtoSources) {
+    public void setExternalProtoSources(List<String> externalProtoSources) {
         this.externalProtoSources = externalProtoSources;
     }
 
-    void setProtocVersion(String protocVersion) {
+    public void setProtocVersion(String protocVersion) {
         this.protocVersion = protocVersion;
     }
 
-    void setTargetDir(String targetDir) {
+    public void setTargetDir(String targetDir) {
         this.targetDir = targetDir;
     }
 
-    void setProjectProtoSourceDir(String projectProtoSourceDir) {
+    public void setProjectProtoSourceDir(String projectProtoSourceDir) {
         this.projectProtoSourceDir = projectProtoSourceDir;
     }
 
-    void setExtractedIncludeDir(String extractedIncludeDir) {
+    public void setExtractedIncludeDir(String extractedIncludeDir) {
         this.extractedIncludeDir = extractedIncludeDir;
     }
 
-    void setGrpc(boolean grpc) { this.grpc = grpc; }
+    public void setGrpc(boolean grpc) { this.grpc = grpc; }
 
-    void setEmbeddedProtoc(boolean embeddedProtoc) { this.embeddedProtoc = embeddedProtoc; }
+    public void setEmbeddedProtoc(boolean embeddedProtoc) { this.embeddedProtoc = embeddedProtoc; }
 
-    void setJavaConversions(boolean javaConversions) { this.javaConversions = javaConversions; }
+    public void setJavaConversions(boolean javaConversions) { this.javaConversions = javaConversions; }
 
-    void setDependencySpec(PatternFilterable dependencySpec) { this.dependencySpec.copyFrom(dependencySpec); }
+    public void setDependencySpec(PatternFilterable dependencySpec) { this.dependencySpec.copyFrom(dependencySpec); }
 
-    void setGradleProtobufExtractedPrefix(String gradleProtobufExtractedPrefix) {
+    public void setGradleProtobufExtractedPrefix(String gradleProtobufExtractedPrefix) {
         this.gradleProtobufExtractedPrefix = gradleProtobufExtractedPrefix;
     }
 
