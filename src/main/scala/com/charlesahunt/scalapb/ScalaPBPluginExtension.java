@@ -4,7 +4,9 @@ import org.gradle.api.tasks.util.PatternFilterable;
 import org.gradle.api.tasks.util.PatternSet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ScalaPBPluginExtension {
     /**
@@ -57,6 +59,12 @@ public class ScalaPBPluginExtension {
      * If using protobuf-gradle-plugin, where are those outputs copied from (relative to project.projectDir)
      */
     String gradleProtobufExtractedPrefix;
+
+    Boolean flatPackage;
+
+    Boolean singleLineToProtoString;
+
+    Boolean asciiFormatToString;
 
 
     public List<String> getExternalProtoSources() {
@@ -121,6 +129,30 @@ public class ScalaPBPluginExtension {
         this.gradleProtobufExtractedPrefix = gradleProtobufExtractedPrefix;
     }
 
+    public Boolean getFlatPackage() {
+        return flatPackage;
+    }
+
+    public void setFlatPackage(Boolean flatPackage) {
+        this.flatPackage = flatPackage;
+    }
+
+    public Boolean getSingleLineToProtoString() {
+        return singleLineToProtoString;
+    }
+
+    public void setSingleLineToProtoString(Boolean singleLineToProtoString) {
+        this.singleLineToProtoString = singleLineToProtoString;
+    }
+
+    public Boolean getAsciiFormatToString() {
+        return asciiFormatToString;
+    }
+
+    public void setAsciiFormatToString(Boolean asciiFormatToString) {
+        this.asciiFormatToString = asciiFormatToString;
+    }
+
     public ScalaPBPluginExtension() {
         this.externalProtoSources = new ArrayList<String>();
         this.protocVersion = "-v360";
@@ -135,5 +167,8 @@ public class ScalaPBPluginExtension {
         // BY CONVENTION, this is usually build/extracted-protos/$sourceSet
         // where sourceSet is usually main
         this.gradleProtobufExtractedPrefix = "build/extracted-include-protos/main";
+        this.flatPackage = false;
+        this.singleLineToProtoString = false;
+        this.asciiFormatToString = false;
     }
 }
