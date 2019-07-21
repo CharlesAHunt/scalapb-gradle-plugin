@@ -16,7 +16,7 @@ class ScalaPB extends DefaultTask with LazyLogging {
 
   //Needs to be lazy so that the correct options are grabbed at runtime
   private lazy val pluginExtensions: ScalaPBPluginExtension = getProject.getExtensions
-      .findByType(classOf[ScalaPBPluginExtension])
+    .findByType(classOf[ScalaPBPluginExtension])
 
   private lazy val targetDir: String = pluginExtensions.targetDir
 
@@ -36,19 +36,24 @@ class ScalaPB extends DefaultTask with LazyLogging {
     val externalProtoSources = pluginExtensions.externalProtoSources.asScala.toList.map(new File(_))
 
     // I believe this will include scalapb-runtime
-    val dependentProtoSources = getProject.getConfigurations.getByName("compile")
-        .asScala.map(_.getAbsolutePath).filter { p =>
-      p.contains("protobuf") || p.contains("scalapb")
-    }.map(new File(_))
+    val dependentProtoSources = getProject.getConfigurations
+      .getByName("compile")
+      .asScala
+      .map(_.getAbsolutePath)
+      .filter { p =>
+        p.contains("protobuf") || p.contains("scalapb")
+      }
+      .map(new File(_))
 
     // we almost certainly want to compile protos in direct dependencies of this project
     // modulo whatever the caller wants to exclude / include
-    val extractedIncludes = getProject.getTasksByName("extractIncludeProto", true)
-        .asScala.flatMap { task =>
-          task.getOutputs.getFiles.getAsFileTree
-              .matching(pluginExtensions.dependencySpec)
-                  .getFiles.asScala
-       }
+    val extractedIncludes = getProject.getTasksByName("extractIncludeProto", true).asScala.flatMap {
+      task =>
+        task.getOutputs.getFiles.getAsFileTree
+          .matching(pluginExtensions.dependencySpec)
+          .getFiles
+          .asScala
+    }
 
     logger.debug(s"picked up following includes from extractIncludeProto: $extractedIncludes")
 
@@ -58,30 +63,33 @@ class ScalaPB extends DefaultTask with LazyLogging {
     val projectProtoSourceDir = pluginExtensions.projectProtoSourceDir
     val grpc = pluginExtensions.grpc
     val embeddedProtoc = pluginExtensions.embeddedProtoc
-    val resolvedGradleProtobufPathPrefix = Paths.get(getProject.getProjectDir.getAbsolutePath,
-      pluginExtensions.gradleProtobufExtractedPrefix).toString
+    val resolvedGradleProtobufPathPrefix = Paths
+      .get(getProject.getProjectDir.getAbsolutePath, pluginExtensions.gradleProtobufExtractedPrefix)
+      .toString
 
     logger.info(s"using $resolvedGradleProtobufPathPrefix as gradle-protobuf-plugin prefix")
 
     logger.info("Running scalapb compiler plugin for: " + getProject.getName)
     ProtocPlugin.sourceGeneratorTask(
-      getProject.getProjectDir.getAbsolutePath,
-      projectProtoSourceDir,
-      externalProtoSources ++ dependentProtoSources ++ extractedIncludes,
-      resolvedGradleProtobufPathPrefix,
-      pluginExtensions.extractedIncludeDir,
-      targetDir,
-      grpc,
-      protocVersion,
-      embeddedProtoc,
-      javaConversions
+      projectRoot = getProject.getProjectDir.getAbsolutePath,
+      projectProtoSourceDir = projectProtoSourceDir,
+      protoIncludePaths = externalProtoSources ++ dependentProtoSources ++ extractedIncludes,
+      gradleProtobufExtractedPrefix = resolvedGradleProtobufPathPrefix,
+      extractedIncludeDir = pluginExtensions.extractedIncludeDir,
+      targetDir = targetDir,
+      grpc = grpc,
+      protocVersion = protocVersion,
+      embeddedProtoc = embeddedProtoc,
+      javaConversions = javaConversions,
+      flatPackage = pluginExtensions.flatPackage,
+      singleLineToProtoString = pluginExtensions.singleLineToProtoString,
+      asciiFormatToString = pluginExtensions.asciiFormatToString
     )
   }
 
   @OutputDirectory
   def getOutputDir: File = new File(s"${getProject.getProjectDir.getAbsolutePath}/$targetDir")
 }
-
 
 import java.io.File
 
@@ -94,34 +102,41 @@ object ProtocPlugin extends LazyLogging {
 
   def collectProtoSources(absoluteSourceDir: File): Set[File] =
     List(absoluteSourceDir).toSet[File].flatMap { srcDir =>
-      (PathFinder(srcDir) ** (GlobFilter("*.proto") /** -- toExclude**/)).get.map(_.getAbsoluteFile)
+      (PathFinder(srcDir) ** (GlobFilter("*.proto") /** -- toExclude**/ )).get
+        .map(_.getAbsoluteFile)
     }
 
   private[this] def executeProtoc(
-    protocCommand: Seq[String] => Int,
-    schemas: Set[File],
-    includePaths: Seq[File],
-    protocOptions: Seq[String],
-    targets: Seq[Target]
-  ) : Int =
+      protocCommand: Seq[String] => Int,
+      schemas: Set[File],
+      includePaths: Seq[File],
+      protocOptions: Seq[String],
+      targets: Seq[Target]
+    ): Int =
     try {
       val incPath = includePaths.map("-I" + _.getCanonicalPath)
-      protocbridge.ProtocBridge.run(protocCommand, targets,
+      protocbridge.ProtocBridge.run(
+        protocCommand,
+        targets,
         incPath ++ protocOptions ++ schemas.map(_.getCanonicalPath),
-          pluginFrontend = protocbridge.frontend.PluginFrontend.newInstance
+        pluginFrontend = protocbridge.frontend.PluginFrontend.newInstance
       )
-    } catch { case e: Exception =>
-      throw new RuntimeException("Error occurred while compiling protobuf files: %s" format(e.getMessage), e)
-  }
+    } catch {
+      case e: Exception =>
+        throw new RuntimeException(
+          "Error occurred while compiling protobuf files: %s" format (e.getMessage),
+          e
+        )
+    }
 
   private[this] def compile(
-    protocCommand: Seq[String] => Int,
-    schemas: Set[File],
-    includePaths: Seq[File],
-    protocOptions: Seq[String],
-    targets: Seq[Target],
-    deleteTargetDirectory: Boolean,
-  ): Set[File] = {
+      protocCommand: Seq[String] => Int,
+      schemas: Set[File],
+      includePaths: Seq[File],
+      protocOptions: Seq[String],
+      targets: Seq[Target],
+      deleteTargetDirectory: Boolean
+    ): Set[File] = {
     // Sort by the length of path names to ensure that delete parent directories before deleting child directories.
     val generatedTargetDirs = targets.map(_.outputPath).sortBy(_.getAbsolutePath.length)
     generatedTargetDirs.foreach { targetDir =>
@@ -132,8 +147,10 @@ object ProtocPlugin extends LazyLogging {
     }
 
     if (schemas.nonEmpty && targets.nonEmpty) {
-      logger.info("Compiling %d protobuf files to %s".format(schemas.size, generatedTargetDirs.mkString(",")))
-      protocOptions.map("\t"+_).foreach(logger.debug(_))
+      logger.info(
+        "Compiling %d protobuf files to %s".format(schemas.size, generatedTargetDirs.mkString(","))
+      )
+      protocOptions.map("\t" + _).foreach(logger.debug(_))
       schemas.foreach(schema => logger.info("Compiling schema %s" format schema))
 
       val exitCode = executeProtoc(protocCommand, schemas, includePaths, protocOptions, targets)
@@ -157,17 +174,21 @@ object ProtocPlugin extends LazyLogging {
     }
   }
 
-  def sourceGeneratorTask(projectRoot: String,
-                          projectProtoSourceDir: String,
-                          protoIncludePaths: List[File],
-                          gradleProtobufExtractedPrefix: String,
-                          extractedIncludeDir: String,
-                          targetDir: String,
-                          grpc: Boolean,
-                          protocVersion: String,
-                          embeddedProtoc: Boolean,
-                          javaConversions: Boolean
-                         ): Set[File] = {
+  def sourceGeneratorTask(
+      projectRoot: String,
+      projectProtoSourceDir: String,
+      protoIncludePaths: List[File],
+      gradleProtobufExtractedPrefix: String,
+      extractedIncludeDir: String,
+      targetDir: String,
+      grpc: Boolean,
+      protocVersion: String,
+      embeddedProtoc: Boolean,
+      javaConversions: Boolean,
+      flatPackage: Boolean = false,
+      singleLineToProtoString: Boolean = false,
+      asciiFormatToString: Boolean = false
+    ): Set[File] = {
     // protoc will use this as a staging dir
     val unpackProtosTo = new File(projectRoot, extractedIncludeDir)
 
@@ -182,10 +203,17 @@ object ProtocPlugin extends LazyLogging {
 
 //    // Include Scala binary version like "_2.11" for cross building.
 //    val cacheFile = (streams in key).value.cacheDirectory / s"protobuf_${scalaBinaryVersion.value}"
-    def protocCommand(arg: Seq[String]) = com.github.os72.protocjar.Protoc.runProtoc(protocVersion +: arg.toArray)
+    def protocCommand(arg: Seq[String]) =
+      com.github.os72.protocjar.Protoc.runProtoc(protocVersion +: arg.toArray)
 
     val target = Target(
-      generatorAndOpts = scalapb.gen(grpc = grpc, javaConversions = javaConversions),
+      generatorAndOpts = scalapb.gen(
+        grpc = grpc,
+        javaConversions = javaConversions,
+        flatPackage = flatPackage,
+        singleLineToProtoString = singleLineToProtoString,
+        asciiFormatToString = asciiFormatToString
+      ),
       outputPath = new File(s"$projectRoot/$targetDir")
     )
 
@@ -194,9 +222,10 @@ object ProtocPlugin extends LazyLogging {
         protocCommand = protocCommand,
         schemas = schemas ++ dependentSchemas,
         includePaths = Nil.+:(absoluteSourceDir).+:(unpackProtosTo),
-        protocOptions =  if( embeddedProtoc ) Seq(s"-v${ProtocVersion.PROTOC_VERSION.mVersion}") else Nil,
+        protocOptions =
+          if (embeddedProtoc) Seq(s"-v${ProtocVersion.PROTOC_VERSION.mVersion}") else Nil,
         targets = Seq(target),
-        deleteTargetDirectory = true,
+        deleteTargetDirectory = true
       )
 //    val cachedCompile = FileFunction.cached(
 //      cacheFile, inStyle = FilesInfo.lastModified, outStyle = FilesInfo.exists) { (in: Set[File]) =>
@@ -209,8 +238,11 @@ object ProtocPlugin extends LazyLogging {
 //    } else cachedCompile(schemas).toSeq
   }
 
-  private[this] def unpack(deps: Seq[File], gradleProtobufExtractedPrefix: String,
-                           extractTarget: File): Seq[File] = {
+  private[this] def unpack(
+      deps: Seq[File],
+      gradleProtobufExtractedPrefix: String,
+      extractTarget: File
+    ): Seq[File] = {
     logger.debug("Unpacking protos: " + deps.toString())
     IO.createDirectory(extractTarget)
     deps.flatMap { dep =>
@@ -218,28 +250,28 @@ object ProtocPlugin extends LazyLogging {
         val path = dep.getPath
 
         //TODO: maybe handle other kinds of dependency containers here
-        if (path.endsWith(".zip") || path.endsWith(".gzip") || path.endsWith(".gz") || path.endsWith(".jar")) {
+        if (path.endsWith(".zip") || path.endsWith(".gzip") || path.endsWith(".gz") || path
+            .endsWith(".jar")) {
           IO.unzip(dep, extractTarget, "*.proto").toSeq
-        }
-        else if (path.endsWith(".proto")) {
+        } else if (path.endsWith(".proto")) {
           val target = if (path.startsWith(gradleProtobufExtractedPrefix)) {
             // this came from a gradleProtobuf output, try to maintain subdirectory structure
-            Paths.get(extractTarget.getAbsolutePath, path.stripPrefix(gradleProtobufExtractedPrefix)).toFile
+            Paths
+              .get(extractTarget.getAbsolutePath, path.stripPrefix(gradleProtobufExtractedPrefix))
+              .toFile
           } else {
             // otherwise just copy from wherever this came from
             Paths.get(extractTarget.getAbsolutePath, dep.getName).toFile
           }
           IO.copy(Seq((dep, target)))
-        }
-        else if (dep.isDirectory) {
+        } else if (dep.isDirectory) {
           IO.copyDirectory(dep, extractTarget, overwrite = true, preserveLastModified = true)
 
           // recalculate destination files, just like copyDirectory
           PathFinder(dep).allPaths.get.flatMap { file =>
             Path.rebase(dep, extractTarget)(file)
           }
-        }
-        else {
+        } else {
           logger.warn(s"Unknown dependency type: $dep")
           Nil
         }
