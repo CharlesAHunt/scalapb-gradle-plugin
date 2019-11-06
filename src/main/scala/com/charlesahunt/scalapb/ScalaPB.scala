@@ -150,7 +150,7 @@ object ProtocPlugin extends LazyLogging {
       logger.info(
         "Compiling %d protobuf files to %s".format(schemas.size, generatedTargetDirs.mkString(","))
       )
-      protocOptions.map("\t" + _).foreach(logger.debug)
+      protocOptions.map("\t" + _).foreach(logger.debug(_))
       schemas.foreach(schema => logger.info("Compiling schema %s" format schema))
 
       val exitCode = executeProtoc(protocCommand, schemas, includePaths, protocOptions, targets)
