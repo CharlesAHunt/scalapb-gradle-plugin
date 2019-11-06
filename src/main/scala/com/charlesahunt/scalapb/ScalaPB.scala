@@ -14,7 +14,7 @@ import scala.collection.JavaConverters._
 
 class ScalaPB extends DefaultTask with LazyLogging {
 
-  //Needs to be lazy so that the correct options are grabbed at runtime
+  //Lazy so that the correct options are grabbed at runtime
   private lazy val pluginExtensions: ScalaPBPluginExtension = getProject.getExtensions
     .findByType(classOf[ScalaPBPluginExtension])
 
@@ -122,10 +122,10 @@ object ProtocPlugin extends LazyLogging {
         pluginFrontend = protocbridge.frontend.PluginFrontend.newInstance
       )
     } catch {
-      case e: Exception =>
+      case error: Exception =>
         throw new RuntimeException(
-          "Error occurred while compiling protobuf files: %s" format (e.getMessage),
-          e
+          "Error occurred while compiling protobuf files: %s" format (error.getMessage),
+          error
         )
     }
 
@@ -150,7 +150,7 @@ object ProtocPlugin extends LazyLogging {
       logger.info(
         "Compiling %d protobuf files to %s".format(schemas.size, generatedTargetDirs.mkString(","))
       )
-      protocOptions.map("\t" + _).foreach(logger.debug(_))
+      protocOptions.map("\t" + _).foreach(logger.debug)
       schemas.foreach(schema => logger.info("Compiling schema %s" format schema))
 
       val exitCode = executeProtoc(protocCommand, schemas, includePaths, protocOptions, targets)

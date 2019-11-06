@@ -3,7 +3,7 @@
 //
 // Protofile syntax: PROTO3
 
-package test.Test
+package test
 
 @SerialVersionUID(0L)
 final case class Person(
@@ -15,9 +15,27 @@ final case class Person(
     private[this] var __serializedSizeCachedValue: _root_.scala.Int = 0
     private[this] def __computeSerializedValue(): _root_.scala.Int = {
       var __size = 0
-      if (name != "") { __size += _root_.com.google.protobuf.CodedOutputStream.computeStringSize(1, name) }
-      if (id != 0) { __size += _root_.com.google.protobuf.CodedOutputStream.computeInt32Size(2, id) }
-      if (email != "") { __size += _root_.com.google.protobuf.CodedOutputStream.computeStringSize(3, email) }
+      
+      {
+        val __value = name
+        if (__value != "") {
+          __size += _root_.com.google.protobuf.CodedOutputStream.computeStringSize(1, __value)
+        }
+      };
+      
+      {
+        val __value = id
+        if (__value != 0) {
+          __size += _root_.com.google.protobuf.CodedOutputStream.computeInt32Size(2, __value)
+        }
+      };
+      
+      {
+        val __value = email
+        if (__value != "") {
+          __size += _root_.com.google.protobuf.CodedOutputStream.computeStringSize(3, __value)
+        }
+      };
       __size
     }
     final override def serializedSize: _root_.scala.Int = {
@@ -48,7 +66,7 @@ final case class Person(
         }
       };
     }
-    def mergeFrom(`_input__`: _root_.com.google.protobuf.CodedInputStream): test.Test.Person = {
+    def mergeFrom(`_input__`: _root_.com.google.protobuf.CodedInputStream): test.Person = {
       var __name = this.name
       var __id = this.id
       var __email = this.email
@@ -66,7 +84,7 @@ final case class Person(
           case tag => _input__.skipField(tag)
         }
       }
-      test.Test.Person(
+      test.Person(
           name = __name,
           id = __id,
           email = __email
@@ -75,7 +93,7 @@ final case class Person(
     def withName(__v: _root_.scala.Predef.String): Person = copy(name = __v)
     def withId(__v: _root_.scala.Int): Person = copy(id = __v)
     def withEmail(__v: _root_.scala.Predef.String): Person = copy(email = __v)
-    def getFieldByNumber(__fieldNumber: _root_.scala.Int): scala.Any = {
+    def getFieldByNumber(__fieldNumber: _root_.scala.Int): _root_.scala.Any = {
       (__fieldNumber: @_root_.scala.unchecked) match {
         case 1 => {
           val __t = name
@@ -92,7 +110,7 @@ final case class Person(
       }
     }
     def getField(__field: _root_.scalapb.descriptors.FieldDescriptor): _root_.scalapb.descriptors.PValue = {
-      require(__field.containingMessage eq companion.scalaDescriptor)
+      _root_.scala.Predef.require(__field.containingMessage eq companion.scalaDescriptor)
       (__field.number: @_root_.scala.unchecked) match {
         case 1 => _root_.scalapb.descriptors.PString(name)
         case 2 => _root_.scalapb.descriptors.PInt(id)
@@ -100,24 +118,24 @@ final case class Person(
       }
     }
     def toProtoString: _root_.scala.Predef.String = _root_.scalapb.TextFormat.printToUnicodeString(this)
-    def companion = test.Test.Person
+    def companion = test.Person
 }
 
-object Person extends scalapb.GeneratedMessageCompanion[test.Test.Person] {
-  implicit def messageCompanion: scalapb.GeneratedMessageCompanion[test.Test.Person] = this
-  def fromFieldsMap(__fieldsMap: scala.collection.immutable.Map[_root_.com.google.protobuf.Descriptors.FieldDescriptor, scala.Any]): test.Test.Person = {
-    require(__fieldsMap.keys.forall(_.getContainingType() == javaDescriptor), "FieldDescriptor does not match message type.")
+object Person extends scalapb.GeneratedMessageCompanion[test.Person] {
+  implicit def messageCompanion: scalapb.GeneratedMessageCompanion[test.Person] = this
+  def fromFieldsMap(__fieldsMap: scala.collection.immutable.Map[_root_.com.google.protobuf.Descriptors.FieldDescriptor, _root_.scala.Any]): test.Person = {
+    _root_.scala.Predef.require(__fieldsMap.keys.forall(_.getContainingType() == javaDescriptor), "FieldDescriptor does not match message type.")
     val __fields = javaDescriptor.getFields
-    test.Test.Person(
+    test.Person(
       __fieldsMap.getOrElse(__fields.get(0), "").asInstanceOf[_root_.scala.Predef.String],
       __fieldsMap.getOrElse(__fields.get(1), 0).asInstanceOf[_root_.scala.Int],
       __fieldsMap.getOrElse(__fields.get(2), "").asInstanceOf[_root_.scala.Predef.String]
     )
   }
-  implicit def messageReads: _root_.scalapb.descriptors.Reads[test.Test.Person] = _root_.scalapb.descriptors.Reads{
+  implicit def messageReads: _root_.scalapb.descriptors.Reads[test.Person] = _root_.scalapb.descriptors.Reads{
     case _root_.scalapb.descriptors.PMessage(__fieldsMap) =>
-      require(__fieldsMap.keys.forall(_.containingMessage == scalaDescriptor), "FieldDescriptor does not match message type.")
-      test.Test.Person(
+      _root_.scala.Predef.require(__fieldsMap.keys.forall(_.containingMessage == scalaDescriptor), "FieldDescriptor does not match message type.")
+      test.Person(
         __fieldsMap.get(scalaDescriptor.findFieldByNumber(1).get).map(_.as[_root_.scala.Predef.String]).getOrElse(""),
         __fieldsMap.get(scalaDescriptor.findFieldByNumber(2).get).map(_.as[_root_.scala.Int]).getOrElse(0),
         __fieldsMap.get(scalaDescriptor.findFieldByNumber(3).get).map(_.as[_root_.scala.Predef.String]).getOrElse("")
@@ -127,11 +145,14 @@ object Person extends scalapb.GeneratedMessageCompanion[test.Test.Person] {
   def javaDescriptor: _root_.com.google.protobuf.Descriptors.Descriptor = TestProto.javaDescriptor.getMessageTypes.get(0)
   def scalaDescriptor: _root_.scalapb.descriptors.Descriptor = TestProto.scalaDescriptor.messages(0)
   def messageCompanionForFieldNumber(__number: _root_.scala.Int): _root_.scalapb.GeneratedMessageCompanion[_] = throw new MatchError(__number)
-  lazy val nestedMessagesCompanions: Seq[_root_.scalapb.GeneratedMessageCompanion[_]] = Seq.empty
+  lazy val nestedMessagesCompanions: Seq[_root_.scalapb.GeneratedMessageCompanion[_ <: _root_.scalapb.GeneratedMessage]] = Seq.empty
   def enumCompanionForFieldNumber(__fieldNumber: _root_.scala.Int): _root_.scalapb.GeneratedEnumCompanion[_] = throw new MatchError(__fieldNumber)
-  lazy val defaultInstance = test.Test.Person(
+  lazy val defaultInstance = test.Person(
+    name = "",
+    id = 0,
+    email = ""
   )
-  implicit class PersonLens[UpperPB](_l: _root_.scalapb.lenses.Lens[UpperPB, test.Test.Person]) extends _root_.scalapb.lenses.ObjectLens[UpperPB, test.Test.Person](_l) {
+  implicit class PersonLens[UpperPB](_l: _root_.scalapb.lenses.Lens[UpperPB, test.Person]) extends _root_.scalapb.lenses.ObjectLens[UpperPB, test.Person](_l) {
     def name: _root_.scalapb.lenses.Lens[UpperPB, _root_.scala.Predef.String] = field(_.name)((c_, f_) => c_.copy(name = f_))
     def id: _root_.scalapb.lenses.Lens[UpperPB, _root_.scala.Int] = field(_.id)((c_, f_) => c_.copy(id = f_))
     def email: _root_.scalapb.lenses.Lens[UpperPB, _root_.scala.Predef.String] = field(_.email)((c_, f_) => c_.copy(email = f_))
@@ -139,4 +160,13 @@ object Person extends scalapb.GeneratedMessageCompanion[test.Test.Person] {
   final val NAME_FIELD_NUMBER = 1
   final val ID_FIELD_NUMBER = 2
   final val EMAIL_FIELD_NUMBER = 3
+  def of(
+    name: _root_.scala.Predef.String,
+    id: _root_.scala.Int,
+    email: _root_.scala.Predef.String
+  ): _root_.test.Person = _root_.test.Person(
+    name,
+    id,
+    email
+  )
 }
