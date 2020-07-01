@@ -4,7 +4,7 @@ plugins {
 //    id "com.github.alisiikh.scalastyle" version "3.1.0"
 //    id 'cz.augi.gradle.wartremover' version '0.9.10'
     id 'cz.alenkacz.gradle.scalafmt' version '1.8.0'
-    id "com.github.maiflai.scalatest" version "0.25"
+    id "com.github.maiflai.scalatest" version "0.26"
     id 'java-gradle-plugin'
     id 'com.gradle.plugin-publish' version '0.10.1'
     id 'com.jfrog.bintray' version '1.8.4'
@@ -30,13 +30,14 @@ dependencies {
     compile 'com.github.os72:protoc-jar:3.8.0'
     compile 'com.typesafe.scala-logging:scala-logging_2.12:3.9.2'
     compile 'com.google.protobuf:protobuf-java:3.10.0'
-    compile 'com.thesamet.scalapb:compilerplugin_2.12:0.9.4'
-    compile 'com.thesamet.scalapb:scalapb-runtime-grpc_2.12:0.9.4'
-    compile 'com.thesamet.scalapb:scalapb-runtime_2.12:0.9.4'
+    compile 'com.thesamet.scalapb:compilerplugin_2.12:0.10.1'
+    compile 'com.thesamet.scalapb:scalapb-runtime-grpc_2.12:0.10.1'
+    compile 'com.thesamet.scalapb:scalapb-runtime_2.12:0.10.1'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.scalatest:scalatest_2.12:3.0.8'
     testRuntime 'org.pegdown:pegdown:1.4.2'
+    testRuntime 'com.vladsch.flexmark:flexmark-all:0.35.10'
 
     testCompile gradleTestKit()
 }
